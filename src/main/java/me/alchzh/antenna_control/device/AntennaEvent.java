@@ -1,7 +1,6 @@
 package me.alchzh.antenna_control.device;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class AntennaEvent {
     public final byte code;
@@ -39,7 +38,13 @@ public class AntennaEvent {
     }
 
     public byte[] toArray() {
+        ByteBuffer b = ByteBuffer.allocate(5 + data.length);
 
+        b.put(code);
+        b.putInt(time);
+        b.put(data);
+
+        return b.array();
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();

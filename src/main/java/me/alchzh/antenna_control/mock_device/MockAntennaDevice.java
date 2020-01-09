@@ -85,6 +85,9 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
     @Override
     public void submitCommand(byte[] data) {
         if (data[0] != POWERON) {
+            if (!poweredOn) {
+                return;
+            }
             send(COMMAND_ISSUED, data);
             sendState();
         }
@@ -113,7 +116,7 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
     }
 
     private void sendControlInfo() {
-        send(POSITION_UNIT_SIZE, new byte[]{Integer.SIZE / Byte.SIZE});
+        send(POSITION_UNIT_SIZE, (byte) (Integer.SIZE / Byte.SIZE));
         send(CONTROL_SPEED, speed);
         send(CONTROL_POSITION_RANGE, minAz, maxAz, minEl, maxEl);
         send(CONTROL_BASE_POSITION, baseAz, baseEl);
