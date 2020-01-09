@@ -13,7 +13,6 @@ public class AntennaEvent {
         this.data = data;
     }
 
-
     public AntennaEvent(byte code, int time, int... data) {
         this.code = code;
         this.time = time;

@@ -5,20 +5,38 @@ import me.alchzh.antenna_control.device.AntennaDeviceBase;
 import me.alchzh.antenna_control.device.AntennaEvent;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
  * A mock implementation of AntennaDeviceInterface with position size 4 (stored in an int)
  */
 public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevice {
+    private ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> sf;
+
+    public static final double DRIFT_FACTOR = ((double) Integer.MAX_VALUE) / (180 * 240));
+
     private boolean poweredOn = false;
+
     private long baseSysTime;
     private byte[] baseSysTimeBA;
     private long baseNanoTime;
+
+    private long moveStartTime = -1;
+    private long moveTime = -1;
+    private long moveFinishedTime = -1;
+    private boolean tracking = false;
     private int az;
     private int el;
+    private int startAz;
+    private int startEl;
     private int destAz;
     private int destEl;
+
     private int baseAz;
     private int baseEl;
     private int minAz;
@@ -52,7 +70,10 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
 
     @Override
     public void submitCommand(byte[] data) {
-        if (data[0] != POWERON) {
+        ByteBuffer b = ByteBuffer.wrap(data);
+        byte command = b.get();
+
+        if (command != POWERON) {
             if (!poweredOn) {
                 return;
             }
@@ -60,22 +81,65 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
             sendState();
         }
 
-        switch (data[0]) {
+        switch (command) {
             case POWERON:
                 poweredOn = true;
                 baseSysTime = System.currentTimeMillis();
                 baseNanoTime = System.nanoTime();
 
-                ByteBuffer b = ByteBuffer.allocate(8);
-                b.putLong(baseSysTime);
-                baseSysTimeBA = b.array();
+                ByteBuffer tb = ByteBuffer.allocate(8);
+                tb.putLong(baseSysTime);
+                baseSysTimeBA = tb.array();
 
                 sendControlInfo();
                 sendState();
                 break;
+            case G0:
+                if (!Objects.isNull(sf)) {
+                    sf.cancel(false);
+                }
+
+                startAz = az;
+                startEl = el; 
+                destAz = b.getInt();
+                destEl = b.getInt();
+
+                int azDist = Math.abs(destAz - startAz);
+                int elDist = Math.abs(destEl - startEl);
+
+                moveTime = Math.max(azDist, elDist) / speed;
+                sf = ses.schedule(() -> {
+                    az = destAz;
+                    el = destEl;
+                    tracking = true;
+                    moveStartTime = -1;
+                    moveTime = -1;
+                    moveFinishedTime = System.nanoTime();
+                    send(MOVE_FINISHED, destAz, destEl);
+                }, moveTime, TimeUnit.MILLISECONDS);
+
+                moveStartTime = System.nanoTime();
+                break;
             default:
                 send(UNKNOWN_COMMAND_ERROR, data[0]);
                 break;
+        }
+    }
+
+    private void updatePos() {
+        if (moveStartTime == -1 && tracking) {
+            long timeDelta = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - moveFinishedTime);
+
+            az = destAz + (int)(timeDelta * DRIFT_FACTOR);
+        } else if (moveStartTime > 0) {
+            long timeDelta = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - moveStartTime);
+
+            if (timeDelta > moveTime) {
+                az = destAz;
+                el = destEl;
+            }
+
+            az = Math.max(az + (int) timeDelta * speed, destAz);
         }
     }
 

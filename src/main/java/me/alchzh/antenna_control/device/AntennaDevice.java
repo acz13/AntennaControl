@@ -2,7 +2,7 @@ package me.alchzh.antenna_control.device;
 
 public interface AntennaDevice {
     /* COMMAND CODES */
-    byte G0 = 0x01; // GOTO AZ EL (DEG DEG)
+    byte G0 = 0x01; // GOTO AZ EL
     byte A0 = 0x02; // DATA ACQUISITION ON OFF (1 OR 0)
 
     byte POWERON = 0x08; // POWER ON FROM SLEEP
@@ -11,13 +11,14 @@ public interface AntennaDevice {
 
     /* RESPONSE EVENT CODES */
     byte POSITION_UNIT_SIZE = 0x40; // SIZE (BYTES) OF POSITION
-    byte CONTROL_SPEED = 0x41; // UNIT PER SEC
+    byte CONTROL_SPEED = 0x41; // UNIT PER MILLIS
     byte CONTROL_POSITION_RANGE = 0x42; // MIN_AZ MAX_AZ MIN_EL MAX_EL
     byte CONTROL_BASE_POSITION = 0x43; // AZ EL
     byte BASE_TIME = 0x44; // 8 BYTE UNIX TIME (LONG)
 
     byte COMMAND_ISSUED = 0x50; // CMD <DATA>
     byte CURRENT_STATE = 0x51; // AZ EL DEST_AZ DEST_EL
+    byte MOVE_FINISHED = 0x52; // AZ EL
 
     byte MEASUREMENT = 0x60; // VALUE
 
