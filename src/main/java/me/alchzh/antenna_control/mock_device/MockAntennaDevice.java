@@ -2,6 +2,7 @@ package me.alchzh.antenna_control.mock_device;
 
 import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaDeviceBase;
+import me.alchzh.antenna_control.device.AntennaEvent;
 import me.alchzh.antenna_control.device.AntennaEventListener;
 
 import java.nio.ByteBuffer;
@@ -62,14 +63,14 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
 
         device.addEventListener(new AntennaEventListener() {
             @Override
-            public void errorEventOccurred(byte[] eventData) {
+            public void errorEventOccurred(AntennaEvent event) {
                 System.out.print("Error ");
-                System.out.println(bytesToHex(eventData));
+                System.out.println(event);
             }
 
             @Override
-            public void dataEventOccurred(byte[] eventData) {
-                System.out.println(bytesToHex(eventData));
+            public void dataEventOccurred(AntennaEvent event) {
+                System.out.println(event);
             }
         });
 
@@ -77,10 +78,14 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
         device.submitCommand(new byte[]{AntennaDevice.G0});
     }
 
+    private int getTimeElapsed() {
+        return (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - baseNanoTime);
+    }
+
     @Override
     public void submitCommand(byte[] data) {
         if (data[0] != POWERON) {
-            sendData(COMMAND_ISSUED, data);
+            send(COMMAND_ISSUED, data);
             sendState();
         }
 
@@ -98,64 +103,34 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
                 sendState();
                 break;
             default:
-                sendError(UNKNOWN_COMMMAND_ERROR, data[0]);
+                send(UNKNOWN_COMMAND_ERROR, data[0]);
                 break;
         }
     }
 
     private void sendState() {
-        sendData(CURRENT_STATE, az, el, destAz, destEl);
+        send(CURRENT_STATE, az, el, destAz, destEl);
     }
 
     private void sendControlInfo() {
-        sendData(POSITION_UNIT_SIZE, new byte[]{Integer.SIZE / Byte.SIZE});
-        sendData(CONTROL_SPEED, speed);
-        sendData(CONTROL_POSITION_RANGE, minAz, maxAz, minEl, maxEl);
-        sendData(CONTROL_BASE_POSITION, baseAz, baseEl);
-        sendData(BASE_TIME, baseSysTimeBA);
-    }
-
-    private byte[] packEvent(byte eventCode, int... arguments) {
-        ByteBuffer payload = ByteBuffer.allocate(5 + arguments.length * (Integer.SIZE / Byte.SIZE));
-
-        payload.put(eventCode);
-        payload.putInt((int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - baseNanoTime));
-
-        for (int arg : arguments) {
-            payload.putInt(arg);
-        }
-
-        return payload.array();
-    }
-
-    private byte[] packEvent(byte eventCode, byte[] data) {
-        ByteBuffer payload = ByteBuffer.allocate(5 + data.length); // 1 byte for command, 8 for time
-
-        payload.put(eventCode);
-        payload.putInt((int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - baseNanoTime));
-        payload.put(data);
-
-        return payload.array();
-    }
-
-    /**
-     * @param data Sends properly packed error event to every registered listener
-     */
-    private void sendError(byte eventCode, byte... data) {
-        sendError(packEvent(eventCode, data));
+        send(POSITION_UNIT_SIZE, new byte[]{Integer.SIZE / Byte.SIZE});
+        send(CONTROL_SPEED, speed);
+        send(CONTROL_POSITION_RANGE, minAz, maxAz, minEl, maxEl);
+        send(CONTROL_BASE_POSITION, baseAz, baseEl);
+        send(BASE_TIME, baseSysTimeBA);
     }
 
     /**
      * @param data Sends properly packed data event to every registered listener
      */
-    private void sendData(byte eventCode, byte... data) {
-        sendData(packEvent(eventCode, data));
+    private void send(byte eventCode, byte... data) {
+        sendRaw((new AntennaEvent(eventCode, getTimeElapsed(), data)).toArray());
     }
 
     /**
-     * @param arguments Sends properly packed data event to every registered listener
+     * @param data Sends properly packed data event to every registered listener
      */
-    private void sendData(byte eventCode, int... arguments) {
-        sendData(packEvent(eventCode, arguments));
+    private void send(byte eventCode, int... data) {
+        sendRaw((new AntennaEvent(eventCode, getTimeElapsed(), data)).toArray());
     }
 }

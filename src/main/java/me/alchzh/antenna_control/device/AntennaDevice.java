@@ -24,7 +24,7 @@ public interface AntennaDevice {
     /* RESPONSE ERROR CODES */
     byte PHYSICAL_POSITION_ERROR = 0x70;
     byte DATA_ACQUISITION_ERROR = 0x71;
-    byte UNKNOWN_COMMMAND_ERROR = 0x72;
+    byte UNKNOWN_COMMAND_ERROR = 0x72;
 
 
     /**

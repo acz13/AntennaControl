@@ -6,21 +6,29 @@ import java.util.Set;
 public abstract class AntennaDeviceBase implements AntennaDevice {
     private final Set<AntennaEventListener> listeners = new HashSet<>();
 
+    protected void sendRaw(byte[] data) {
+        if (data[0] < 0x70) {
+            sendRawData(data);
+        } else {
+            sendRawError(data);
+        }
+    }
+
     /**
      * @param data Sends an error event to every registered listener raw
      */
-    protected void sendError(byte[] data) {
+    private void sendRawError(byte[] data) {
         for (AntennaEventListener listener : listeners) {
-            listener.errorEventOccurred(data);
+            listener.errorEventOccurred(AntennaEvent.fromArray(data));
         }
     }
 
     /**
      * @param data Sends a data event to every registered listener raw
      */
-    protected void sendData(byte[] data) {
+    private void sendRawData(byte[] data) {
         for (AntennaEventListener listener : listeners) {
-            listener.dataEventOccurred(data);
+            listener.dataEventOccurred(AntennaEvent.fromArray(data));
         }
     }
 
