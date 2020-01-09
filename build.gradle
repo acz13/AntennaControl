@@ -2,7 +2,7 @@ apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'application'
 
-mainClassName = 'me.alchzh.antenna_control.mock_device.MockAntennaDevice'
+mainClassName = 'me.alchzh.antenna_control.controller.AntennaController'
 
 jar {
     manifest {
