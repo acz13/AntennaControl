@@ -2,70 +2,70 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6a8e3600-60be-4534-9752-438f1364cd10" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/AntennaControl.main.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/antennacontrol.test.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEvent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AntennaControl.iml" beforeDir="false" afterPath="$PROJECT_DIR$/AntennaControl.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AntennaControl.ipr" beforeDir="false" afterPath="$PROJECT_DIR$/AntennaControl.ipr" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AntennaControl.iws" beforeDir="false" afterPath="$PROJECT_DIR$/AntennaControl.iws" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDevice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDevice.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDeviceBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDeviceBase.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEventListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEventListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/mock_device/MockAntennaDevice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/mock_device/MockAntennaDevice.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/AntennaControl.main.iml" afterDir="false"/>
+      <change afterPath="$PROJECT_DIR$/antennacontrol.test.iml" afterDir="false"/>
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEvent.java" afterDir="false"/>
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false"/>
+      <change beforePath="$PROJECT_DIR$/AntennaControl.iml" beforeDir="false" afterPath="$PROJECT_DIR$/AntennaControl.iml" afterDir="false"/>
+      <change beforePath="$PROJECT_DIR$/AntennaControl.ipr" beforeDir="false" afterPath="$PROJECT_DIR$/AntennaControl.ipr" afterDir="false"/>
+      <change beforePath="$PROJECT_DIR$/AntennaControl.iws" beforeDir="false" afterPath="$PROJECT_DIR$/AntennaControl.iws" afterDir="false"/>
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDevice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDevice.java" afterDir="false"/>
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDeviceBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDeviceBase.java" afterDir="false"/>
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEventListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEventListener.java" afterDir="false"/>
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/mock_device/MockAntennaDevice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/mock_device/MockAntennaDevice.java" afterDir="false"/>
     </list>
-    <ignored path="$PROJECT_DIR$/out/" />
-    <ignored path="$PROJECT_DIR$/.gradle/" />
-    <ignored path="$PROJECT_DIR$/build/" />
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <option name="SHOW_DIALOG" value="false" />
-    <option name="HIGHLIGHT_CONFLICTS" value="true" />
-    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
-    <option name="LAST_RESOLUTION" value="IGNORE" />
+    <ignored path="$PROJECT_DIR$/out/"/>
+    <ignored path="$PROJECT_DIR$/.gradle/"/>
+    <ignored path="$PROJECT_DIR$/build/"/>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true"/>
+    <option name="SHOW_DIALOG" value="false"/>
+    <option name="HIGHLIGHT_CONFLICTS" value="true"/>
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false"/>
+    <option name="LAST_RESOLUTION" value="IGNORE"/>
   </component>
   <component name="DefaultGradleProjectSettings">
-    <option name="isMigrated" value="true" />
+    <option name="isMigrated" value="true"/>
   </component>
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
-      <ProjectState />
+      <ProjectState/>
     </projectState>
   </component>
   <component name="ExternalProjectsManager">
     <system id="GRADLE">
       <state>
         <task path="$PROJECT_DIR$">
-          <activation />
+          <activation/>
         </task>
         <task path="$PROJECT_DIR$">
-          <activation />
+          <activation/>
         </task>
         <projects_view>
           <tree_state>
             <expand>
               <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="AntennaControl" type="f1a62948:ProjectNode" />
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode"/>
+                <item name="AntennaControl" type="f1a62948:ProjectNode"/>
               </path>
               <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="AntennaControl" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode"/>
+                <item name="AntennaControl" type="f1a62948:ProjectNode"/>
+                <item name="Tasks" type="e4a08cd1:TasksNode"/>
               </path>
               <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="AntennaControl" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="application" type="c8890929:TasksNode$1" />
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode"/>
+                <item name="AntennaControl" type="f1a62948:ProjectNode"/>
+                <item name="Tasks" type="e4a08cd1:TasksNode"/>
+                <item name="application" type="c8890929:TasksNode$1"/>
               </path>
               <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="AntennaControl" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="build" type="c8890929:TasksNode$1" />
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode"/>
+                <item name="AntennaControl" type="f1a62948:ProjectNode"/>
+                <item name="Tasks" type="e4a08cd1:TasksNode"/>
+                <item name="build" type="c8890929:TasksNode$1"/>
               </path>
             </expand>
-            <select />
+            <select/>
           </tree_state>
         </projects_view>
       </state>
@@ -77,7 +77,7 @@
         <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-7">
-              <caret line="6" column="5" selection-start-line="6" selection-start-column="5" selection-end-line="6" selection-end-column="5" />
+              <caret line="6" column="5" selection-start-line="6" selection-start-column="5" selection-end-line="6" selection-end-column="5"/>
             </state>
           </provider>
         </entry>
@@ -86,11 +86,11 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/mock_device/MockAntennaDevice.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-51">
-              <caret line="68" column="13" lean-forward="true" selection-start-line="68" selection-start-column="13" selection-end-line="68" selection-end-column="13" />
+              <caret line="68" column="13" lean-forward="true" selection-start-line="68" selection-start-column="13" selection-end-line="68" selection-end-column="13"/>
               <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#2561#2562#0" expanded="true" />
-                <element signature="e#2653#2654#0" expanded="true" />
+                <element signature="imports" expanded="true"/>
+                <element signature="e#2561#2562#0" expanded="true"/>
+                <element signature="e#2653#2654#0" expanded="true"/>
               </folding>
             </state>
           </provider>
@@ -100,10 +100,10 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEvent.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="312">
-              <caret line="41" selection-start-line="41" selection-end-line="41" />
+              <caret line="41" selection-start-line="41" selection-end-line="41"/>
               <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#1921#1922#0" expanded="true" />
+                <element signature="imports" expanded="true"/>
+                <element signature="e#1921#1922#0" expanded="true"/>
               </folding>
             </state>
           </provider>
@@ -113,7 +113,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/Main.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="90">
-              <caret line="8" selection-start-line="8" selection-end-line="8" />
+              <caret line="8" selection-start-line="8" selection-end-line="8"/>
             </state>
           </provider>
         </entry>
@@ -122,7 +122,7 @@
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="45">
-              <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
+              <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4"/>
             </state>
           </provider>
         </entry>
@@ -131,7 +131,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDeviceBase.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="120">
-              <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
+              <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29"/>
             </state>
           </provider>
         </entry>
@@ -140,7 +140,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDevice.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="390">
-              <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20" />
+              <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20"/>
             </state>
           </provider>
         </entry>
@@ -149,7 +149,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEventListener.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="90">
-              <caret line="6" column="46" selection-start-line="6" selection-start-column="46" selection-end-line="6" selection-end-column="46" />
+              <caret line="6" column="46" selection-start-line="6" selection-start-column="46" selection-end-line="6" selection-end-column="46"/>
             </state>
           </provider>
         </entry>
@@ -159,285 +159,285 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
+        <option value="Class"/>
       </list>
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$"/>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="master"/>
       </map>
     </option>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEventListener.java" />
-        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDevice.java" />
-        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDeviceBase.java" />
-        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/mock_device/MockAntennaDevice.java" />
-        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEvent.java" />
+        <option value="$PROJECT_DIR$/.gitignore"/>
+        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEventListener.java"/>
+        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDevice.java"/>
+        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDeviceBase.java"/>
+        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/mock_device/MockAntennaDevice.java"/>
+        <option value="$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEvent.java"/>
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="85" />
-    <option name="y" value="25" />
-    <option name="width" value="1750" />
-    <option name="height" value="980" />
+    <option name="x" value="85"/>
+    <option name="y" value="25"/>
+    <option name="width" value="1750"/>
+    <option name="height" value="980"/>
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
-    <ConfirmationsSetting value="2" id="Add" />
+    <ConfirmationsSetting value="2" id="Add"/>
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
-      <foldersAlwaysOnTop value="true" />
+      <foldersAlwaysOnTop value="true"/>
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
+      <pane id="PackagesPane"/>
+      <pane id="Scope"/>
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
-              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode"/>
+              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
             </path>
             <path>
-              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode"/>
+              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="src" type="462c0819:PsiDirectoryNode"/>
             </path>
             <path>
-              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode"/>
+              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="src" type="462c0819:PsiDirectoryNode"/>
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
             </path>
             <path>
-              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode"/>
+              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="src" type="462c0819:PsiDirectoryNode"/>
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="java" type="462c0819:PsiDirectoryNode"/>
             </path>
             <path>
-              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="antenna_control" type="462c0819:PsiDirectoryNode" />
+              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode"/>
+              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="src" type="462c0819:PsiDirectoryNode"/>
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="java" type="462c0819:PsiDirectoryNode"/>
+              <item name="antenna_control" type="462c0819:PsiDirectoryNode"/>
             </path>
             <path>
-              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="antenna_control" type="462c0819:PsiDirectoryNode" />
-              <item name="device" type="462c0819:PsiDirectoryNode" />
+              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode"/>
+              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="src" type="462c0819:PsiDirectoryNode"/>
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="java" type="462c0819:PsiDirectoryNode"/>
+              <item name="antenna_control" type="462c0819:PsiDirectoryNode"/>
+              <item name="device" type="462c0819:PsiDirectoryNode"/>
             </path>
             <path>
-              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="antenna_control" type="462c0819:PsiDirectoryNode" />
-              <item name="mock_device" type="462c0819:PsiDirectoryNode" />
+              <item name="AntennaControl" type="b2602c69:ProjectViewProjectNode"/>
+              <item name="AntennaControl" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="src" type="462c0819:PsiDirectoryNode"/>
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode"/>
+              <item name="java" type="462c0819:PsiDirectoryNode"/>
+              <item name="antenna_control" type="462c0819:PsiDirectoryNode"/>
+              <item name="mock_device" type="462c0819:PsiDirectoryNode"/>
             </path>
           </expand>
-          <select />
+          <select/>
         </subPane>
       </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true"/>
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default"/>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
       <list>
         <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule"/>
         </RuleState>
         <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
+          <option name="name" value="StatusDashboardGroupingRule"/>
         </RuleState>
       </list>
     </option>
   </component>
   <component name="RunManager" selected="Gradle.AntennaControl [run]">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="me.alchzh.antenna_control.Main" />
-      <module name="AntennaControl.main" />
+      <option name="MAIN_CLASS_NAME" value="me.alchzh.antenna_control.Main"/>
+      <module name="AntennaControl.main"/>
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="me.alchzh.antenna_control.*" />
-          <option name="ENABLED" value="true" />
+          <option name="PATTERN" value="me.alchzh.antenna_control.*"/>
+          <option name="ENABLED" value="true"/>
         </pattern>
       </extension>
       <method v="2">
-        <option name="Make" enabled="true" />
+        <option name="Make" enabled="true"/>
       </method>
     </configuration>
     <configuration name="MockAntennaDevice (1)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="me.alchzh.antenna_control.mock_device.MockAntennaDevice" />
-      <module name="AntennaControl.main" />
+      <option name="MAIN_CLASS_NAME" value="me.alchzh.antenna_control.mock_device.MockAntennaDevice"/>
+      <module name="AntennaControl.main"/>
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="me.alchzh.antenna_control.mock_device.*" />
-          <option name="ENABLED" value="true" />
+          <option name="PATTERN" value="me.alchzh.antenna_control.mock_device.*"/>
+          <option name="ENABLED" value="true"/>
         </pattern>
       </extension>
       <method v="2">
-        <option name="Make" enabled="true" />
+        <option name="Make" enabled="true"/>
       </method>
     </configuration>
     <configuration name="MockAntennaDevice" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="me.alchzh.antenna_control.mock_device.MockAntennaDevice" />
-      <module name="AntennaControl" />
+      <option name="MAIN_CLASS_NAME" value="me.alchzh.antenna_control.mock_device.MockAntennaDevice"/>
+      <module name="AntennaControl"/>
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="me.alchzh.antenna_control.mock_device.*" />
-          <option name="ENABLED" value="true" />
+          <option name="PATTERN" value="me.alchzh.antenna_control.mock_device.*"/>
+          <option name="ENABLED" value="true"/>
         </pattern>
       </extension>
       <method v="2">
-        <option name="Make" enabled="true" />
+        <option name="Make" enabled="true"/>
       </method>
     </configuration>
     <configuration name="AntennaControl [run]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
+        <option name="executionName"/>
+        <option name="externalProjectPath" value="$PROJECT_DIR$"/>
+        <option name="externalSystemIdString" value="GRADLE"/>
+        <option name="scriptParameters"/>
         <option name="taskDescriptions">
-          <list />
+          <list/>
         </option>
         <option name="taskNames">
           <list>
-            <option value="run" />
+            <option value="run"/>
           </list>
         </option>
-        <option name="vmOptions" />
+        <option name="vmOptions"/>
       </ExternalSystemSettings>
       <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
-      <method v="2" />
+      <method v="2"/>
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.AntennaControl [run]" />
-        <item itemvalue="Application.Main" />
-        <item itemvalue="Application.MockAntennaDevice (1)" />
-        <item itemvalue="Application.MockAntennaDevice" />
+        <item itemvalue="Gradle.AntennaControl [run]"/>
+        <item itemvalue="Application.Main"/>
+        <item itemvalue="Application.MockAntennaDevice (1)"/>
+        <item itemvalue="Application.MockAntennaDevice"/>
       </list>
     </recent_temporary>
   </component>
   <component name="SvnConfiguration">
-    <configuration />
+    <configuration/>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="6a8e3600-60be-4534-9752-438f1364cd10" name="Default Changelist" comment="" />
+      <changelist id="6a8e3600-60be-4534-9752-438f1364cd10" name="Default Changelist" comment=""/>
       <created>1578556437369</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
+      <option name="number" value="Default"/>
+      <option name="presentableId" value="Default"/>
       <updated>1578556437369</updated>
     </task>
-    <servers />
+    <servers/>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
+    <frame x="-7" y="-7" width="1550" height="838" extended-state="6"/>
+    <editor active="true"/>
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22818792" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Designer" order="2" />
-      <window_info id="UI Designer" order="3" />
-      <window_info id="Favorites" order="4" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.3045326" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Build" order="10" weight="0.3297546" />
-      <window_info anchor="right" id="Palette&#9;" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Palette" order="3" />
-      <window_info anchor="right" id="Palette " order="4" />
-      <window_info anchor="right" id="Maven" order="5" />
-      <window_info anchor="right" id="Gradle" order="6" visible="true" weight="0.23489933" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22818792"/>
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25"/>
+      <window_info id="Designer" order="2"/>
+      <window_info id="UI Designer" order="3"/>
+      <window_info id="Favorites" order="4" side_tool="true"/>
+      <window_info anchor="bottom" id="Messages"/>
+      <window_info anchor="bottom" id="Message" order="0"/>
+      <window_info anchor="bottom" id="Find" order="1"/>
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.3045326"/>
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4"/>
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25"/>
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4"/>
+      <window_info anchor="bottom" id="TODO" order="6"/>
+      <window_info anchor="bottom" id="Version Control" order="7"/>
+      <window_info anchor="bottom" id="Terminal" order="8"/>
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true"/>
+      <window_info anchor="bottom" id="Build" order="10" weight="0.3297546"/>
+      <window_info anchor="right" id="Palette	"/>
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4"/>
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25"/>
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25"/>
+      <window_info anchor="right" id="Palette" order="3"/>
+      <window_info anchor="right" id="Palette " order="4"/>
+      <window_info anchor="right" id="Maven" order="5"/>
+      <window_info anchor="right" id="Gradle" order="6" visible="true" weight="0.23489933"/>
     </layout>
   </component>
   <component name="antWorkspaceConfiguration">
-    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
-    <option name="FILTER_TARGETS" value="false" />
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false"/>
+    <option name="FILTER_TARGETS" value="false"/>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-7">
-          <caret line="6" column="5" selection-start-line="6" selection-start-column="5" selection-end-line="6" selection-end-column="5" />
+          <caret line="6" column="5" selection-start-line="6" selection-start-column="5" selection-end-line="6" selection-end-column="5"/>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
-          <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
+          <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4"/>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/Main.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
-          <caret line="8" selection-start-line="8" selection-end-line="8" />
+          <caret line="8" selection-start-line="8" selection-end-line="8"/>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEventListener.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
-          <caret line="6" column="46" selection-start-line="6" selection-start-column="46" selection-end-line="6" selection-end-column="46" />
+          <caret line="6" column="46" selection-start-line="6" selection-start-column="46" selection-end-line="6" selection-end-column="46"/>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDevice.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="390">
-          <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20" />
+          <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20"/>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaDeviceBase.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
-          <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
+          <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29"/>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/device/AntennaEvent.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="312">
-          <caret line="41" selection-start-line="41" selection-end-line="41" />
+          <caret line="41" selection-start-line="41" selection-end-line="41"/>
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1921#1922#0" expanded="true" />
+            <element signature="imports" expanded="true"/>
+            <element signature="e#1921#1922#0" expanded="true"/>
           </folding>
         </state>
       </provider>
@@ -445,18 +445,18 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/me/alchzh/antenna_control/mock_device/MockAntennaDevice.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-51">
-          <caret line="68" column="13" lean-forward="true" selection-start-line="68" selection-start-column="13" selection-end-line="68" selection-end-column="13" />
+          <caret line="68" column="13" lean-forward="true" selection-start-line="68" selection-start-column="13" selection-end-line="68" selection-end-column="13"/>
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2561#2562#0" expanded="true" />
-            <element signature="e#2653#2654#0" expanded="true" />
+            <element signature="imports" expanded="true"/>
+            <element signature="e#2561#2562#0" expanded="true"/>
+            <element signature="e#2653#2654#0" expanded="true"/>
           </folding>
         </state>
       </provider>
     </entry>
   </component>
   <component name="gradleExecuteTaskHistory">
-    <option value="$PROJECT_DIR$" />
-    <option value="cleanIdea" />
+    <option value="$PROJECT_DIR$"/>
+    <option value="cleanIdea"/>
   </component>
 </project>
