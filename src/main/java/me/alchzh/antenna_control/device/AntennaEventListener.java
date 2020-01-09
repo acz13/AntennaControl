@@ -1,4 +1,4 @@
-package me.alchzh.antenna_control;
+package me.alchzh.antenna_control.device;
 
 public interface AntennaEventListener {
     /**
