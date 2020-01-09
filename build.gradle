@@ -1,0 +1,8 @@
+apply plugin: 'idea'
+apply plugin: 'java'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'me.alchzh.antenna_control.Main'
+    }
+}

@@ -1,4 +1,4 @@
-package me.alchzh;
+package me.alchzh.antenna_control;
 
 public class Main {
 

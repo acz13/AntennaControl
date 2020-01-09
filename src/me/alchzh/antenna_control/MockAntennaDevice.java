@@ -1,9 +1,9 @@
-package me.alchzh;
+package me.alchzh.antenna_control;
 
 import java.util.ArrayList;
 
 public class MockAntennaDevice implements AntennaDeviceInterface {
-    private ArrayList<AntennaEventListener> listeners = new ArrayList<AntennaEventListener>();
+    private ArrayList<AntennaEventListener> listeners = new ArrayList<>();
 
     @Override
     public void submitCommand(byte[] data) {
