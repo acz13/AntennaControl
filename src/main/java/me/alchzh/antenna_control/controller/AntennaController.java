@@ -27,29 +27,27 @@ class AntennaController {
     private ZonedDateTime baseTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC"));
     private Future<?> sf;
 
+    private int speed;
+
     public AntennaController(AntennaDevice device) {
         this.device = device;
 
         device.addEventListener((AntennaEvent event) -> {
-            if (event.type == AntennaEvent.Type.BASE_TIME) {
-                long millis = ByteBuffer.wrap(event.data).getLong();
-                baseTime =
-                        ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault());
-            }
-
-            System.out.print(dtf.format(baseTime.plus(Duration.ofMillis(event.time))));
-
-            if (event.isError()) System.out.print("Error ");
-            System.out.println(event);
+            String log = process(event);
+            System.out.printf("%s %s\n", getFormattedTime(event.time), log);
         });
     }
 
-    public static int d(double degrees) {
+    public static int u(double degrees) {
         return (int) (degrees * (Integer.MAX_VALUE / 180.0));
     }
 
+    public static double d(int units) {
+        return (double) units * 180.0 / Integer.MAX_VALUE;
+    }
+
     public static void main(String[] args) throws IOException {
-        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, d(135), d(70), d(5 / 1000.0));
+        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
         AntennaController controller = new AntennaController(device);
 
         BufferedReader in
@@ -58,6 +56,31 @@ class AntennaController {
 
         controller.runScript(script);
         System.exit(0);
+    }
+
+    private String process(AntennaEvent event) {
+        ByteBuffer b = ByteBuffer.wrap(event.data);
+
+        switch (event.type) {
+            case BASE_TIME:
+                long millis = b.getLong();
+                baseTime = ZonedDateTime.ofInstant(
+                        Instant.ofEpochMilli(millis), ZoneId.systemDefault());
+                return "Set base time to " + dtf.format(baseTime);
+            case POSITION_UNIT_SIZE:
+                // TODO: handle different position sizes
+                assert b.get() == (byte) 0x04;
+                return "Confirmed position size = 4";
+            case CONTROL_SPEED:
+                speed = b.getInt();
+                return "Set speed to " + speed + " u/ms = " + d(speed) * 1000 + " d/s";
+        }
+
+        return event.toString();
+    }
+
+    private String getFormattedTime(int time) {
+        return dtf.format(baseTime.plus(Duration.ofMillis(time)));
     }
 
     public void runScript(AntennaScript script) {
