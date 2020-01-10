@@ -1,8 +1,6 @@
 package me.alchzh.antenna_control.device;
 
 public interface AntennaDevice {
-
-
     /**
      * Submits a command to the device
      *
@@ -13,21 +11,21 @@ public interface AntennaDevice {
     /**
      * Submits a command to the device
      *
-     * @param code Command code
+     * @param type Command type
      * @param data Command data / arguments
      */
-    default void submitCommand(byte code, byte... data) {
-        submitCommand(new AntennaCommand(code, data));
+    default void submitCommand(AntennaCommand.Type type, byte... data) {
+        submitCommand(new AntennaCommand(type, data));
     }
 
     /**
      * Submits a command to the device
      *
-     * @param code Command code
+     * @param type Command type
      * @param data Command data / arguments
      */
-    default void submitCommand(byte code, int... data) {
-        submitCommand(new AntennaCommand(code, data));
+    default void submitCommand(AntennaCommand.Type type, int... data) {
+        submitCommand(new AntennaCommand(type, data));
     }
 
     /**

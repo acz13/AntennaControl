@@ -1,39 +1,25 @@
 package me.alchzh.antenna_control.device;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
-import static me.alchzh.antenna_control.util.Hex.byteToHex;
 import static me.alchzh.antenna_control.util.Hex.bytesToHex;
 
 public class AntennaEvent {
-    /* RESPONSE EVENT CODES */
-    public static final byte POSITION_UNIT_SIZE = 0x40; // SIZE (BYTES) OF POSITION
-    public static final byte CONTROL_SPEED = 0x41; // UNIT PER MILLIS
-    public static final byte CONTROL_POSITION_RANGE = 0x42; // MIN_AZ MAX_AZ MIN_EL MAX_EL
-    public static final byte CONTROL_BASE_POSITION = 0x43; // AZ EL
-    public static final byte BASE_TIME = 0x44; // 8 BYTE UNIX TIME (LONG)
-    public static final byte COMMAND_ISSUED = 0x50; // CMD <DATA>
-    public static final byte CURRENT_STATE = 0x51; // AZ EL DEST_AZ DEST_EL
-    public static final byte MOVE_FINISHED = 0x52; // AZ EL
-    public static final byte MOVE_CANCELED = 0x53; // AZ EL DEST_AZ DEST_EL
-    public static final byte MEASUREMENT = 0x60; // VALUE
-    /* RESPONSE ERROR CODES */
-    public static final byte PHYSICAL_POSITION_ERROR = 0x70;
-    public static final byte DATA_ACQUISITION_ERROR = 0x71;
-    public static final byte UNKNOWN_COMMAND_ERROR = 0x72;
-    public static final byte DEVICE_POWEROFF_ERROR = 0x79;
-    public final byte code;
-    public final int time;
-    public final byte[] data;
+    public final Type type;
 
-    public AntennaEvent(byte code, int time, byte[] data) {
-        this.code = code;
+    public AntennaEvent(Type type, int time, byte[] data) {
+        this.type = type;
         this.time = time;
         this.data = data;
     }
 
-    public AntennaEvent(byte code, int time, int... data) {
-        this.code = code;
+    public final int time;
+    public final byte[] data;
+
+    public AntennaEvent(Type type, int time, int... data) {
+        this.type = type;
         this.time = time;
 
         ByteBuffer d = ByteBuffer.allocate(data.length * (Integer.SIZE / Byte.SIZE));
@@ -52,13 +38,13 @@ public class AntennaEvent {
         byte[] data = new byte[b.remaining()];
         b.get(data);
 
-        return new AntennaEvent(code, time, data);
+        return new AntennaEvent(Type.fromCode(code), time, data);
     }
 
     public byte[] toArray() {
         ByteBuffer b = ByteBuffer.allocate(5 + data.length);
 
-        b.put(code);
+        b.put(type.getCode());
         b.putInt(time);
         b.put(data);
 
@@ -68,13 +54,57 @@ public class AntennaEvent {
     @Override
     public String toString() {
         return "AntennaEvent{" +
-                "code=" + byteToHex(code) +
-                ", time=" + time +
+                "type=" + type +
+                ", time=" + time + "ms" +
                 ", data=" + bytesToHex(data) +
                 '}';
     }
 
     public boolean isError() {
-        return code >= 0x6F;
+        return type.getCode() >= 0x6F;
+    }
+
+    public enum Type {
+        /* CONTROL EVENTS */
+        POSITION_UNIT_SIZE(0x40),
+        CONTROL_SPEED(0x41),
+        CONTROL_POSITION_RANGE(0x42),
+        CONTROL_BASE_POSITION(0x43),
+        BASE_TIME(0x44),
+
+        /* RESPONSE EVENTS */
+        COMMAND_ISSUED(0x50),
+        CURRENT_STATE(0x51),
+        MOVE_FINISHED(0x52),
+        MOVE_CANCELED(0x53),
+        MEASUREMENT(0x60),
+
+        /* ERROR EVENTS */
+        PHYSICAL_POSITION_ERROR(0x70),
+        DATA_ACQUISITION_ERROR(0x71),
+        UNKNOWN_COMMAND_ERROR(0x72),
+        DEVICE_POWEROFF_ERROR(0x79);
+
+        private static final Map<Byte, Type> codeToTypeMap = new HashMap<>();
+
+        static {
+            for (Type type : Type.values()) {
+                codeToTypeMap.put(type.code, type);
+            }
+        }
+
+        private byte code;
+
+        Type(int code) {
+            this.code = (byte) code;
+        }
+
+        public static AntennaEvent.Type fromCode(byte code) {
+            return codeToTypeMap.get(code);
+        }
+
+        public byte getCode() {
+            return code;
+        }
     }
 }

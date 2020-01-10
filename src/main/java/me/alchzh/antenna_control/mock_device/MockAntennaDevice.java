@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * A mock implementation of AntennaDeviceInterface with position size 4 (stored in an int)
  */
 public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevice {
-    private ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> sf;
 
     public static final double DRIFT_FACTOR = ((double) Integer.MAX_VALUE) / (180 * 240);
@@ -68,19 +68,19 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
 
     @Override
     public void submitCommand(AntennaCommand command) {
-        if (command.code != AntennaCommand.POWERON) {
+        if (command.type != AntennaCommand.Type.POWERON) {
             if (!poweredOn) {
-                send(AntennaEvent.DEVICE_POWEROFF_ERROR);
+                send(AntennaEvent.Type.DEVICE_POWEROFF_ERROR);
                 return;
             }
-            send(AntennaEvent.COMMAND_ISSUED, command.toArray());
+            send(AntennaEvent.Type.COMMAND_ISSUED);
             sendState();
         }
 
         ByteBuffer b = ByteBuffer.wrap(command.data);
 
-        switch (command.code) {
-            case AntennaCommand.POWERON:
+        switch (command.type) {
+            case POWERON:
                 poweredOn = true;
                 long baseSysTime = System.currentTimeMillis();
                 baseNanoTime = System.nanoTime();
@@ -92,15 +92,15 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
                 sendControlInfo();
                 ses.scheduleAtFixedRate(this::sendState, 0, 1000, TimeUnit.MILLISECONDS);
                 break;
-            case AntennaCommand.POWEROFF:
+            case POWEROFF:
                 poweredOn = false;
                 ses.shutdownNow();
                 break;
-            case AntennaCommand.G0:
+            case G0:
                 updatePos();
 
                 if (moveStartTime > 0) {
-                    send(AntennaEvent.MOVE_CANCELED, az, el, destAz, destEl);
+                    send(AntennaEvent.Type.MOVE_CANCELED, az, el, destAz, destEl);
                 }
 
                 startAz = az;
@@ -114,11 +114,11 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
                 moveTime = Math.max(azDist, elDist) / speed;
                 moveStartTime = System.nanoTime();
                 break;
-            case AntennaCommand.T0:
+            case T0:
                 tracking = b.get() != 0;
                 break;
             default:
-                send(AntennaEvent.UNKNOWN_COMMAND_ERROR, command.code);
+                send(AntennaEvent.Type.UNKNOWN_COMMAND_ERROR, command.type.getCode());
                 break;
         }
     }
@@ -138,7 +138,7 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
                 moveStartTime = -1;
                 moveTime = -1;
                 moveFinishedTime = System.nanoTime();
-                send(AntennaEvent.MOVE_FINISHED, destAz, destEl);
+                send(AntennaEvent.Type.MOVE_FINISHED, destAz, destEl);
             } else {
                 az = Math.max(startAz + (int) timeDelta * speed, destAz);
                 el = Math.max(startEl + (int) timeDelta * speed, startEl);
@@ -147,34 +147,34 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
 
         // TODO: Work properly when min > max (i.e. crosses 180 degrees)
         if (az < minAz || az > maxAz || el < minEl || el > maxEl) {
-            send(AntennaEvent.PHYSICAL_POSITION_ERROR);
+            send(AntennaEvent.Type.PHYSICAL_POSITION_ERROR);
         }
     }
 
     private void sendState() {
         updatePos();
-        send(AntennaEvent.CURRENT_STATE, az, el, destAz, destEl);
+        send(AntennaEvent.Type.CURRENT_STATE, az, el, destAz, destEl);
     }
 
     private void sendControlInfo() {
-        send(AntennaEvent.BASE_TIME, baseSysTimeBA);
-        send(AntennaEvent.POSITION_UNIT_SIZE, (byte) 0x04);
-        send(AntennaEvent.CONTROL_SPEED, speed);
-        send(AntennaEvent.CONTROL_POSITION_RANGE, minAz, maxAz, minEl, maxEl);
-        send(AntennaEvent.CONTROL_BASE_POSITION, baseAz, baseEl);
+        send(AntennaEvent.Type.BASE_TIME, baseSysTimeBA);
+        send(AntennaEvent.Type.POSITION_UNIT_SIZE, (byte) 0x04);
+        send(AntennaEvent.Type.CONTROL_SPEED, speed);
+        send(AntennaEvent.Type.CONTROL_POSITION_RANGE, minAz, maxAz, minEl, maxEl);
+        send(AntennaEvent.Type.CONTROL_BASE_POSITION, baseAz, baseEl);
     }
 
     /**
      * @param data Sends properly packed data event to every registered listener
      */
-    private void send(byte eventCode, byte... data) {
-        sendRaw((new AntennaEvent(eventCode, getTimeElapsed(), data)).toArray());
+    private void send(AntennaEvent.Type eventType, byte... data) {
+        sendEvent(new AntennaEvent(eventType, getTimeElapsed(), data));
     }
 
     /**
      * @param data Sends properly packed data event to every registered listener
      */
-    private void send(byte eventCode, int... data) {
-        sendRaw((new AntennaEvent(eventCode, getTimeElapsed(), data)).toArray());
+    private void send(AntennaEvent.Type eventType, int... data) {
+        sendEvent(new AntennaEvent(eventType, getTimeElapsed(), data));
     }
 }

@@ -1,28 +1,23 @@
 package me.alchzh.antenna_control.device;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
-import static me.alchzh.antenna_control.util.Hex.byteToHex;
 import static me.alchzh.antenna_control.util.Hex.bytesToHex;
 
 public class AntennaCommand {
-    /* COMMAND CODES */
-    public static final byte G0 = 0x01; // GOTO AZ EL
-    public static final byte T0 = 0x03; // TRACKING ON OFF
-    public static final byte A0 = 0x05; // DATA ACQUISITION ON OFF (1 OR 0)
-    public static final byte POWERON = 0x08; // POWER ON FROM SLEEP
-    public static final byte POWEROFF = 0x09; // POWER OFF
+    public final Type type;
 
-    public final byte code;
-    public final byte[] data;
-
-    public AntennaCommand(byte code, byte[] data) {
-        this.code = code;
+    public AntennaCommand(Type type, byte[] data) {
+        this.type = type;
         this.data = data;
     }
 
-    public AntennaCommand(byte code, int... data) {
-        this.code = code;
+    public final byte[] data;
+
+    public AntennaCommand(Type type, int... data) {
+        this.type = type;
 
         ByteBuffer d = ByteBuffer.allocate(data.length * (Integer.SIZE / Byte.SIZE));
         for (int arg : data) {
@@ -39,24 +34,55 @@ public class AntennaCommand {
         byte[] data = new byte[b.remaining()];
         b.get(data);
 
-        return new AntennaCommand(code, data);
+        return new AntennaCommand(AntennaCommand.Type.fromCode(code), data);
     }
 
     public byte[] toArray() {
         ByteBuffer b = ByteBuffer.allocate(1 + data.length);
 
-        b.put(code);
+        b.put(type.getCode());
         b.put(data);
 
         return b.array();
     }
 
-
     @Override
     public String toString() {
         return "AntennaCommand{" +
-                "code=" + byteToHex(code) +
+                "type=" + type +
                 ", data=" + bytesToHex(data) +
                 '}';
+    }
+
+
+    public enum Type {
+        /* COMMANDS */
+        G0(0x01),
+        T0(0x03),
+        A0(0x05),
+        POWERON(0x08),
+        POWEROFF(0x09);
+
+        private static final Map<Byte, AntennaCommand.Type> codeToTypeMap = new HashMap<>();
+
+        static {
+            for (AntennaCommand.Type type : AntennaCommand.Type.values()) {
+                codeToTypeMap.put(type.code, type);
+            }
+        }
+
+        private byte code;
+
+        Type(int code) {
+            this.code = (byte) code;
+        }
+
+        public static AntennaCommand.Type fromCode(byte code) {
+            return codeToTypeMap.get(code);
+        }
+
+        public byte getCode() {
+            return code;
+        }
     }
 }

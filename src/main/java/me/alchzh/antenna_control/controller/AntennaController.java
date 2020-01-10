@@ -31,7 +31,7 @@ class AntennaController {
         this.device = device;
 
         device.addEventListener((AntennaEvent event) -> {
-            if (event.code == AntennaEvent.BASE_TIME) {
+            if (event.type == AntennaEvent.Type.BASE_TIME) {
                 long millis = ByteBuffer.wrap(event.data).getLong();
                 baseTime =
                         ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault());
@@ -76,10 +76,10 @@ class AntennaController {
     }
 
     public void poweron() {
-        device.submitCommand(AntennaCommand.POWERON);
+        device.submitCommand(AntennaCommand.Type.POWERON);
     }
 
     public void poweroff() {
-        device.submitCommand(AntennaCommand.POWEROFF);
+        device.submitCommand(AntennaCommand.Type.POWEROFF);
     }
 }

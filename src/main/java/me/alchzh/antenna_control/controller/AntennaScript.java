@@ -116,15 +116,15 @@ public class AntennaScript {
 
                         AntennaEventListener notifier = (AntennaEvent event) -> {
                             synchronized (this) {
-                                if (event.code == AntennaEvent.MOVE_CANCELED
-                                        || event.code == AntennaEvent.MOVE_FINISHED) {
+                                if (event.type == AntennaEvent.Type.MOVE_CANCELED
+                                        || event.type == AntennaEvent.Type.MOVE_FINISHED) {
                                     this.notify();
                                 }
                             }
                         };
 
                         device.addEventListener(notifier);
-                        device.submitCommand(AntennaCommand.G0, intArr);
+                        device.submitCommand(AntennaCommand.Type.G0, intArr);
 
                         synchronized (this) {
                             this.wait();
@@ -133,7 +133,7 @@ public class AntennaScript {
 
                         break;
                     case "T0":
-                        device.submitCommand(AntennaCommand.T0, Byte.parseByte(instr.arguments.get(0)));
+                        device.submitCommand(AntennaCommand.Type.G0, Byte.parseByte(instr.arguments.get(0)));
                         break;
                     case "WAIT":
                         TimeUnit.MILLISECONDS.sleep(Long.parseLong(instr.arguments.get(0)));

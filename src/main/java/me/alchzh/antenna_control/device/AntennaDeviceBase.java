@@ -15,7 +15,7 @@ public abstract class AntennaDeviceBase implements AntennaDevice {
      *
      * @param event Event to send
      */
-    private void sendEvent(AntennaEvent event) {
+    protected void sendEvent(AntennaEvent event) {
         for (AntennaEventListener listener : listeners) {
             listener.eventOccurred(event);
         }
