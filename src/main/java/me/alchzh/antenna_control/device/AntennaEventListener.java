@@ -1,13 +1,11 @@
 package me.alchzh.antenna_control.device;
 
+@FunctionalInterface
 public interface AntennaEventListener {
     /**
-     * @param eventData Method called when error event received from device
+     * Called when a regular (data) event is received
+     *
+     * @param event The event
      */
-    void errorEventOccurred(AntennaEvent event);
-
-    /**
-     * @param eventData Method called when data event received from device
-     */
-    void dataEventOccurred(AntennaEvent event);
+    void eventOccurred(AntennaEvent event);
 }

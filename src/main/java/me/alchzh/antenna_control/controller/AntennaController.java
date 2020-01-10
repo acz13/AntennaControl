@@ -1,58 +1,85 @@
 package me.alchzh.antenna_control.controller;
 
-import me.alchzh.antenna_control.device.*;
+import me.alchzh.antenna_control.device.AntennaCommand;
+import me.alchzh.antenna_control.device.AntennaDevice;
+import me.alchzh.antenna_control.device.AntennaEvent;
 import me.alchzh.antenna_control.mock_device.MockAntennaDevice;
 
-class AntennaController {
-    private AntennaDevice device;
-    private Thread mainThread;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-    public static int d(double degrees) {
-        return (int) ((degrees / 180) * Integer.MAX_VALUE);
-    }
+class AntennaController {
+    public static final DateTimeFormatter dtf =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss.SSS ");
+    private final AntennaDevice device;
+    private final ExecutorService es = Executors.newSingleThreadExecutor();
+    private ZonedDateTime baseTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC"));
+    private Future<?> sf;
 
     public AntennaController(AntennaDevice device) {
         this.device = device;
 
-        device.addEventListener(new AntennaEventListener() {
-            @Override
-            public void errorEventOccurred(AntennaEvent event) {
-                System.out.print("Error ");
-                System.out.println(event);
+        device.addEventListener((AntennaEvent event) -> {
+            if (event.code == AntennaEvent.BASE_TIME) {
+                long millis = ByteBuffer.wrap(event.data).getLong();
+                baseTime =
+                        ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault());
             }
 
-            @Override
-            public void dataEventOccurred(AntennaEvent event) {
-                System.out.println(event);
-            }
+            System.out.print(dtf.format(baseTime.plus(Duration.ofMillis(event.time))));
+
+            if (event.isError()) System.out.print("Error ");
+            System.out.println(event);
         });
     }
 
-    public Thread run() {
-        mainThread = new Thread(() -> {
-            device.submitCommand(new byte[]{AntennaDevice.POWERON});
-
-            try  {
-                Thread.sleep(1000);
-            } catch (InterruptedException ie)  {
-
-            }
-
-            device.submitCommand(new byte[]{AntennaDevice.G0});
-        }, "mainThread");
-
-        mainThread.start();
-        return mainThread;
+    public static int d(double degrees) {
+        return (int) (degrees * (Integer.MAX_VALUE / 180.0));
     }
 
-    public Thread getMainThread() {
-        return mainThread;
-    }
-
-    public static void main(String[] args) {
-        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, d(135), d(70), d(5));
+    public static void main(String[] args) throws IOException {
+        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, d(135), d(70), d(5 / 1000.0));
         AntennaController controller = new AntennaController(device);
 
-        controller.run();
+        BufferedReader in
+                = new BufferedReader(new FileReader("INPUT"));
+        AntennaScript script = new AntennaScript(in);
+
+        controller.runScript(script);
+        System.exit(0);
+    }
+
+    public void runScript(AntennaScript script) {
+        poweron();
+        sf = es.submit(script.attach(device));
+        try {
+            sf.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        poweroff();
+    }
+
+    public void cancelScript() {
+        sf.cancel(true);
+    }
+
+    public void poweron() {
+        device.submitCommand(AntennaCommand.POWERON);
+    }
+
+    public void poweroff() {
+        device.submitCommand(AntennaCommand.POWEROFF);
     }
 }

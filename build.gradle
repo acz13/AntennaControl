@@ -4,6 +4,10 @@ apply plugin: 'application'
 
 mainClassName = 'me.alchzh.antenna_control.controller.AntennaController'
 
+run {
+    standardInput = System.in
+}
+
 jar {
     manifest {
         attributes 'Main-Class': mainClassName

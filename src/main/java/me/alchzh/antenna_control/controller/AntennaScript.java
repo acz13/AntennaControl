@@ -1,23 +1,55 @@
 package me.alchzh.antenna_control.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import me.alchzh.antenna_control.device.AntennaCommand;
+import me.alchzh.antenna_control.device.AntennaDevice;
+import me.alchzh.antenna_control.device.AntennaEvent;
+import me.alchzh.antenna_control.device.AntennaEventListener;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
-import me.alchzh.antenna_control.device.AntennaDevice;
+import java.util.stream.Collectors;
 
 public class AntennaScript {
-    private ArrayList<AntennaScriptInstruction> instructions = new ArrayList<>();
-    private Map<String, Integer> labels = new HashMap<>();
+    private final ArrayList<AntennaScriptInstruction> instructions = new ArrayList<>();
+    private final Map<String, Integer> labels = new HashMap<>();
+
+    public AntennaScript(BufferedReader br) throws IOException {
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.startsWith("#")) continue;
+            if (line.startsWith("ENDSCRIPT")) break;
+
+            AntennaScriptInstruction instruction = new AntennaScriptInstruction(line);
+
+            if (instruction.command == null) {
+                continue;
+            } else if (instruction.command.equals("LABEL")) {
+                labels.put(instruction.arguments.get(1), instructions.size());
+            }
+
+            instructions.add(instruction);
+        }
+    }
+
+    public static int d(double degrees) {
+        return (int) (degrees * (Integer.MAX_VALUE / 180.0));
+    }
+
+    @Override
+    public String toString() {
+        return instructions.stream()
+                .map(AntennaScriptInstruction::toString)
+                .collect(Collectors.joining(" "));
+    }
 
     static class AntennaScriptInstruction {
-        public static final Pattern pattern = Pattern.compile("\\$([A-Z_0-9]+)");
+        public static final Pattern pattern = Pattern.compile("([#A-Z_0-9]+)");
 
         public final String command;
         public final List<String> arguments;
@@ -25,32 +57,95 @@ public class AntennaScript {
         public AntennaScriptInstruction(String line) {
             Matcher m = pattern.matcher(line);
 
-            m.find();
+            if (!m.find()) {
+                command = "";
+                arguments = Collections.emptyList();
+                return;
+            }
+
             command = m.group(1);
 
-            ArrayList<String> tmpArguments = new ArrayList<String>();
+            ArrayList<String> tmpArguments = new ArrayList<>();
             while (m.find()) {
                 tmpArguments.add(m.group(1).toUpperCase());
             }
             arguments = Collections.unmodifiableList(tmpArguments);
         }
+
+        @Override
+        public String toString() {
+            return command + " " + String.join(" ", arguments);
+        }
     }
 
-    class AntennaScriptRunner implements Runnable {
+    public AntennaScriptRunner attach(AntennaDevice device) {
+        return new AntennaScriptRunner(device);
+    }
+
+    class AntennaScriptRunner implements Callable<Void> {
         private int scCursor = 0;
-        private AntennaDevice device;
+        private final AntennaDevice device;
 
         public AntennaScriptRunner(AntennaDevice device) {
             this.device = device;
         }
 
         @Override
-        public void run() {
+        public Void call() throws InterruptedException {
+            while (scCursor < instructions.size()) {
+                AntennaScriptInstruction instr = instructions.get(scCursor);
 
+                System.out.println(instr);
+
+                switch (instr.command) {
+                    case "LABEL":
+                    case "":
+                    case "#":
+                        break;
+                    case "GOTO":
+                        String label = instr.arguments.get(0);
+                        scCursor = labels.get(label);
+                        continue;
+                    case "EXIT":
+                        return null;
+                    case "G0":
+                        int[] intArr = instr.arguments.stream()
+                                .mapToInt(Integer::parseInt)
+                                .map(AntennaScript::d)
+                                .toArray();
+
+                        AntennaEventListener notifier = (AntennaEvent event) -> {
+                            synchronized (this) {
+                                if (event.code == AntennaEvent.MOVE_CANCELED
+                                        || event.code == AntennaEvent.MOVE_FINISHED) {
+                                    this.notify();
+                                }
+                            }
+                        };
+
+                        device.addEventListener(notifier);
+                        device.submitCommand(AntennaCommand.G0, intArr);
+
+                        synchronized (this) {
+                            this.wait();
+                            device.removeEventListener(notifier);
+                        }
+
+                        break;
+                    case "T0":
+                        device.submitCommand(AntennaCommand.T0, Byte.parseByte(instr.arguments.get(0)));
+                        break;
+                    case "WAIT":
+                        TimeUnit.MILLISECONDS.sleep(Long.parseLong(instr.arguments.get(0)));
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(instr.command);
+                }
+
+                scCursor++;
+            }
+
+            return null;
         }
-    }
-
-    public AntennaScriptRunner attach(AntennaDevice device) {
-        return new AntennaScriptRunner(device);
     }
 }

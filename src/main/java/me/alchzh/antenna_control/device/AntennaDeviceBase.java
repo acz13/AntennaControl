@@ -7,30 +7,17 @@ public abstract class AntennaDeviceBase implements AntennaDevice {
     private final Set<AntennaEventListener> listeners = new HashSet<>();
 
     protected void sendRaw(byte[] data) {
-        AntennaEvent event = AntennaEvent.fromArray(data);
-
-        if (event.isError()) {
-            sendErrorEvent(event);
-        } else {
-            sendDataEvent(event);
-        }
+        sendEvent(AntennaEvent.fromArray(data));
     }
 
     /**
-     * @param data Sends an error event to every registered listener raw
+     * Sends a regular (data) event to every registered listener
+     *
+     * @param event Event to send
      */
-    private void sendErrorEvent(AntennaEvent event) {
+    private void sendEvent(AntennaEvent event) {
         for (AntennaEventListener listener : listeners) {
-            listener.errorEventOccurred(event);
-        }
-    }
-
-    /**
-     * @param data Sends a data event to every registered listener raw
-     */
-    private void sendDataEvent(AntennaEvent event) {
-        for (AntennaEventListener listener : listeners) {
-            listener.dataEventOccurred(event);
+            listener.eventOccurred(event);
         }
     }
 
