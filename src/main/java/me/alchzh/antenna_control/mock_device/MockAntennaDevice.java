@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * A mock implementation of AntennaDeviceInterface with position size 4 (stored in an int)
  */
 public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevice {
-    private final ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+    private ScheduledExecutorService ses;
     private ScheduledFuture<?> sf;
 
     public static final double DRIFT_FACTOR = ((double) Integer.MAX_VALUE) / (180 * 240);
@@ -81,6 +81,12 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
 
         switch (command.type) {
             case POWERON:
+                if (ses == null) {
+                    ses = Executors.newScheduledThreadPool(
+                            1, r -> new Thread(r, "sendStateThread")
+                    );
+                }
+
                 poweredOn = true;
                 long baseSysTime = System.currentTimeMillis();
                 baseNanoTime = System.nanoTime();
@@ -95,6 +101,7 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
                 break;
             case POWEROFF:
                 poweredOn = false;
+                sf.cancel(true);
                 ses.shutdownNow();
                 break;
             case G0:

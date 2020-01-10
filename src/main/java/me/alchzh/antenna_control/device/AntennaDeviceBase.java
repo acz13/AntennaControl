@@ -2,10 +2,10 @@ package me.alchzh.antenna_control.device;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AntennaDeviceBase implements AntennaDevice {
-    private final Set<AntennaEventListener> listeners = new ConcurrentHashMap<>().newKeySet();
+    private final Object MONITOR = new Object();
+    private Set<AntennaDevice.Listener> listeners;
 
     protected void sendRaw(byte[] data) {
         sendEvent(AntennaEvent.fromArray(data));
@@ -17,18 +17,35 @@ public abstract class AntennaDeviceBase implements AntennaDevice {
      * @param event Event to send
      */
     protected void sendEvent(AntennaEvent event) {
-        for (AntennaEventListener listener : listeners) {
+        Set<AntennaDevice.Listener> observersCopy;
+
+        synchronized (MONITOR) {
+            if (listeners == null) return;
+            observersCopy = new HashSet<>(listeners);
+        }
+
+        for (Listener listener : observersCopy) {
             listener.eventOccurred(event);
         }
     }
 
     @Override
-    public void addEventListener(AntennaEventListener listener) {
-        listeners.add(listener);
+    public void addEventListener(AntennaDevice.Listener listener) {
+        if (listener == null) return;
+
+        synchronized (MONITOR) {
+            if (listeners == null) {
+                listeners = new HashSet<>(1);
+            }
+
+            listeners.add(listener);
+        }
     }
 
     @Override
-    public void removeEventListener(AntennaEventListener listener) {
-        listeners.remove(listener);
+    public void removeEventListener(AntennaDevice.Listener listener) {
+        synchronized (MONITOR) {
+            if (listeners != null) listeners.remove(listener);
+        }
     }
 }

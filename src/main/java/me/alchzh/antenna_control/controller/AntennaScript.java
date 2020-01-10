@@ -3,7 +3,6 @@ package me.alchzh.antenna_control.controller;
 import me.alchzh.antenna_control.device.AntennaCommand;
 import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaEvent;
-import me.alchzh.antenna_control.device.AntennaEventListener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -114,7 +113,7 @@ public class AntennaScript {
                                 .map(AntennaScript::d)
                                 .toArray();
 
-                        AntennaEventListener notifier = (AntennaEvent event) -> {
+                        AntennaDevice.Listener notifier = (AntennaEvent event) -> {
                             synchronized (instr) {
                                 if (event.type == AntennaEvent.Type.MOVE_FINISHED) {
                                     System.out.println("unlocking");
@@ -123,10 +122,10 @@ public class AntennaScript {
                             }
                         };
 
-                        synchronized (instr) {
-                            device.addEventListener(notifier);
-                            device.submitCommand(AntennaCommand.Type.G0, intArr);
+                        device.addEventListener(notifier);
+                        device.submitCommand(AntennaCommand.Type.G0, intArr);
 
+                        synchronized (instr) {
                             instr.wait();
 
                             device.removeEventListener(notifier);

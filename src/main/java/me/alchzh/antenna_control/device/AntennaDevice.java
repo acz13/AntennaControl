@@ -2,6 +2,11 @@ package me.alchzh.antenna_control.device;
 
 public interface AntennaDevice {
     /**
+     * @param listener Registers a listener to response data from the device.
+     */
+    void addEventListener(AntennaDevice.Listener listener);
+
+    /**
      * Submits a command to the device
      *
      * @param command Command to submit
@@ -29,12 +34,17 @@ public interface AntennaDevice {
     }
 
     /**
-     * @param listener Registers a listener to response data from the device.
-     */
-    void addEventListener(AntennaEventListener listener);
-
-    /**
      * @param listener Unregisters a listener to response data from the device.
      */
-    void removeEventListener(AntennaEventListener listener);
+    void removeEventListener(AntennaDevice.Listener listener);
+
+    @FunctionalInterface
+    interface Listener {
+        /**
+         * Called when a regular (data) event is received
+         *
+         * @param event The event
+         */
+        void eventOccurred(AntennaEvent event);
+    }
 }
