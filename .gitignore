@@ -10,3 +10,7 @@ bin/
 
 .vscode/
 .theia/
+
+*ss.iml
+*.ipr
+*.iws

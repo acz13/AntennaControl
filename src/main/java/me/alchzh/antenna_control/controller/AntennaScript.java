@@ -30,7 +30,7 @@ public class AntennaScript {
             if (instruction.command == null) {
                 continue;
             } else if (instruction.command.equals("LABEL")) {
-                labels.put(instruction.arguments.get(1), instructions.size());
+                labels.put(instruction.arguments.get(0), instructions.size());
             }
 
             instructions.add(instruction);
@@ -115,19 +115,20 @@ public class AntennaScript {
                                 .toArray();
 
                         AntennaEventListener notifier = (AntennaEvent event) -> {
-                            synchronized (this) {
-                                if (event.type == AntennaEvent.Type.MOVE_CANCELED
-                                        || event.type == AntennaEvent.Type.MOVE_FINISHED) {
-                                    this.notify();
+                            synchronized (instr) {
+                                if (event.type == AntennaEvent.Type.MOVE_FINISHED) {
+                                    System.out.println("unlocking");
+                                    instr.notify();
                                 }
                             }
                         };
 
-                        device.addEventListener(notifier);
-                        device.submitCommand(AntennaCommand.Type.G0, intArr);
+                        synchronized (instr) {
+                            device.addEventListener(notifier);
+                            device.submitCommand(AntennaCommand.Type.G0, intArr);
 
-                        synchronized (this) {
-                            this.wait();
+                            instr.wait();
+
                             device.removeEventListener(notifier);
                         }
 

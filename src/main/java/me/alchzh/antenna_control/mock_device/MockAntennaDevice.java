@@ -21,7 +21,6 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
     public static final double DRIFT_FACTOR = ((double) Integer.MAX_VALUE) / (180 * 240);
 
     private boolean poweredOn = false;
-    private final int baseAz;
     private long baseNanoTime;
 
     private long moveStartTime = -1;
@@ -34,6 +33,7 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
     private int startEl;
     private int destAz;
     private int destEl;
+    private final int baseAz;
     private final int baseEl;
     private final int minAz;
     private final int minEl;
@@ -73,8 +73,8 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
                 send(AntennaEvent.Type.DEVICE_POWEROFF_ERROR);
                 return;
             }
-            send(AntennaEvent.Type.COMMAND_ISSUED);
             sendState();
+            send(AntennaEvent.Type.COMMAND_ISSUED, command.type.getCode());
         }
 
         ByteBuffer b = ByteBuffer.wrap(command.data);
@@ -90,7 +90,8 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
                 baseSysTimeBA = tb.array();
 
                 sendControlInfo();
-                ses.scheduleAtFixedRate(this::sendState, 0, 1000, TimeUnit.MILLISECONDS);
+                sf = ses.scheduleAtFixedRate(this::sendState, 0, 1000, TimeUnit.MILLISECONDS);
+
                 break;
             case POWEROFF:
                 poweredOn = false;
@@ -140,8 +141,17 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
                 moveFinishedTime = System.nanoTime();
                 send(AntennaEvent.Type.MOVE_FINISHED, destAz, destEl);
             } else {
-                az = Math.max(startAz + (int) timeDelta * speed, destAz);
-                el = Math.max(startEl + (int) timeDelta * speed, startEl);
+                if (az < destAz) {
+                    az = Math.min(startAz + (int) timeDelta * speed, destAz);
+                } else {
+                    az = Math.max(startAz - (int) timeDelta * speed, destAz);
+                }
+                
+                if (el < destEl) {
+                    el = Math.min(startEl + (int) timeDelta * speed, destEl);
+                } else {
+                    el = Math.max(startEl - (int) timeDelta * speed, destEl);
+                }
             }
         }
 
@@ -152,8 +162,12 @@ public class MockAntennaDevice extends AntennaDeviceBase implements AntennaDevic
     }
 
     private void sendState() {
-        updatePos();
-        send(AntennaEvent.Type.CURRENT_STATE, az, el, destAz, destEl);
+        try {
+            updatePos();
+            send(AntennaEvent.Type.CURRENT_STATE, az, el, destAz, destEl);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendControlInfo() {
