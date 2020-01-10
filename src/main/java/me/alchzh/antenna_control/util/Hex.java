@@ -1,7 +1,6 @@
 package me.alchzh.antenna_control.util;
 
 public class Hex {
-    @SuppressWarnings("SpellCheckingInspection")
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
     public static String bytesToHex(byte[] bytes) {
