@@ -125,7 +125,7 @@ class AntennaController {
                 return String.format("Move finished. Current location: (%.3f, %.3f)", d(az), d(el));
 
             default:
-                return event.toString();
+                return (event.isError() ? "Error: " : "") + event;
         }
     }
 
