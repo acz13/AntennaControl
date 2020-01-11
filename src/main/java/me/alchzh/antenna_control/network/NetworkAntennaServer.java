@@ -1,7 +1,9 @@
-package me.alchzh.antenna_control.mock_device;
+package me.alchzh.antenna_control.network;
 
 import me.alchzh.antenna_control.device.AntennaCommand;
+import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaEvent;
+import me.alchzh.antenna_control.mock_device.MockAntennaDevice;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,8 +11,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-public class MockNetworkAntennaServer implements MockAntenna.Forwarder {
-    private MockAntenna antenna;
+/**
+ * A server that wraps an AntennaDevice to communicate over a TCP socket
+ */
+public class NetworkAntennaServer implements AntennaDevice.Listener {
+    private AntennaDevice device;
 
     private ServerSocketChannel serverSocket;
     private SocketChannel client;
@@ -18,8 +23,9 @@ public class MockNetworkAntennaServer implements MockAntenna.Forwarder {
     private ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
     private ByteBuffer readBuffer = ByteBuffer.allocate(1024);
 
-    public MockNetworkAntennaServer(int baseAz, int baseEl, int minAz, int minEl, int maxAz, int maxEl, int speed) throws IOException {
-        antenna = new MockAntenna(this, baseAz, baseEl, minAz, minEl, maxAz, maxEl, speed);
+    public NetworkAntennaServer(AntennaDevice device) throws IOException {
+        this.device = device;
+        device.addEventListener(this);
 
         serverSocket = ServerSocketChannel.open();
     }
@@ -33,8 +39,10 @@ public class MockNetworkAntennaServer implements MockAntenna.Forwarder {
     }
 
     public static void main(String[] args) throws IOException {
-        (new MockNetworkAntennaServer(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0)))
-                .listen("127.0.0.1", 52532);
+        AntennaDevice mockAntenna = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
+        NetworkAntennaServer server = new NetworkAntennaServer(mockAntenna);
+
+        server.listen("127.0.0.1", 52532);
     }
 
     private void read(int length) throws IOException {
@@ -84,7 +92,7 @@ public class MockNetworkAntennaServer implements MockAntenna.Forwarder {
                 AntennaCommand command = readCommand();
                 System.out.println(command);
 
-                antenna.commandReceived(command);
+                device.submitCommand(command);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -92,8 +100,9 @@ public class MockNetworkAntennaServer implements MockAntenna.Forwarder {
         }
     }
 
+
     @Override
-    public void sendEvent(AntennaEvent event) {
+    public void eventOccurred(AntennaEvent event) {
         writeBuffer.clear();
         writeBuffer.put(event.toArray());
         writeBuffer.put((byte) 0x0A);

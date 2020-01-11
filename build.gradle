@@ -12,7 +12,7 @@ run {
 }
 
 task(runNetworkServer, dependsOn: 'classes', type: JavaExec) {
-    main = 'me.alchzh.antenna_control.mock_device.MockNetworkAntennaServer'
+    main = 'me.alchzh.antenna_control.network.NetworkAntennaServer'
     classpath = sourceSets.main.runtimeClasspath
 }
 

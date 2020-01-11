@@ -1,10 +1,17 @@
-package me.alchzh.antenna_control.device;
+package me.alchzh.antenna_control.network;
+
+import me.alchzh.antenna_control.device.AntennaCommand;
+import me.alchzh.antenna_control.device.AntennaDeviceBase;
+import me.alchzh.antenna_control.device.AntennaEvent;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+/**
+ * A device that communicates over a TCP socket
+ */
 public class NetworkAntennaDevice extends AntennaDeviceBase implements Runnable {
     private SocketChannel client;
     private ByteBuffer writeBuffer = ByteBuffer.allocate(1024);

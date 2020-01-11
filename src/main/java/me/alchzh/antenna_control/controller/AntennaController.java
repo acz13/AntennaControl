@@ -3,7 +3,7 @@ package me.alchzh.antenna_control.controller;
 import me.alchzh.antenna_control.device.AntennaCommand;
 import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaEvent;
-import me.alchzh.antenna_control.device.NetworkAntennaDevice;
+import me.alchzh.antenna_control.network.NetworkAntennaDevice;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
