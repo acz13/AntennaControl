@@ -29,12 +29,16 @@ public interface AntennaDevice {
     }
 
     /**
-     * @param listener Registers a listener to response data from the device.
+     * Registers an event listener to the device.
+     *
+     * @param listener The listener
      */
     void addEventListener(AntennaDevice.Listener listener);
 
     /**
-     * @param listener Unregisters a listener to response data from the device.
+     * Unregisters an event listener from the device.
+     *
+     * @param listener The listener
      */
     void removeEventListener(AntennaDevice.Listener listener);
 

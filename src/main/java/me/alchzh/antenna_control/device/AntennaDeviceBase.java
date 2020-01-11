@@ -18,14 +18,14 @@ public abstract class AntennaDeviceBase implements AntennaDevice {
      * @param event Event to send
      */
     protected void sendEvent(AntennaEvent event) {
-        Set<AntennaDevice.Listener> observersCopy;
+        Set<AntennaDevice.Listener> listenersCopy;
 
         synchronized (MONITOR) {
             if (listeners == null) return;
-            observersCopy = new HashSet<>(listeners);
+            listenersCopy = new HashSet<>(listeners);
         }
 
-        for (Listener listener : observersCopy) {
+        for (Listener listener : listenersCopy) {
             listener.eventOccurred(event);
         }
     }
