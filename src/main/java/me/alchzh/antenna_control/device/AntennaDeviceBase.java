@@ -1,5 +1,6 @@
 package me.alchzh.antenna_control.device;
 
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,7 +9,7 @@ public abstract class AntennaDeviceBase implements AntennaDevice {
     private Set<AntennaDevice.Listener> listeners;
 
     protected void sendRaw(byte[] data) {
-        sendEvent(AntennaEvent.fromArray(data));
+        sendEvent(AntennaEvent.readFromBuffer(ByteBuffer.wrap(data)));
     }
 
     /**

@@ -3,7 +3,7 @@ package me.alchzh.antenna_control.controller;
 import me.alchzh.antenna_control.device.AntennaCommand;
 import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaEvent;
-import me.alchzh.antenna_control.mock_device.MockAntennaDevice;
+import me.alchzh.antenna_control.device.NetworkAntennaDevice;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -61,7 +61,9 @@ class AntennaController {
     }
 
     public static void main(String[] args) throws IOException {
-        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
+//        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
+        AntennaDevice device = new NetworkAntennaDevice("127.0.0.1", 52532);
+
         AntennaController controller = new AntennaController(device);
 
         BufferedReader in
@@ -108,7 +110,7 @@ class AntennaController {
 
                 return String.format("Set base position to (%.3f, %.3f)", d(baseAz), d(baseEl));
             case COMMAND_ISSUED:
-                return String.format("Issued command %s", AntennaCommand.Type.fromCode(b.get()));
+                return String.format("Issued command %s", AntennaCommand.readFromBuffer(b));
             case CURRENT_STATE:
                 az = b.getInt();
                 el = b.getInt();

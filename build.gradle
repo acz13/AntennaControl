@@ -11,6 +11,11 @@ run {
     standardInput = System.in
 }
 
+task(runNetworkServer, dependsOn: 'classes', type: JavaExec) {
+    main = 'me.alchzh.antenna_control.mock_device.MockNetworkAntennaServer'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 jar {
     manifest {
         attributes 'Main-Class': mainClassName

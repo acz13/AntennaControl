@@ -8,18 +8,21 @@ import static me.alchzh.antenna_control.util.Hex.bytesToHex;
 
 public class AntennaCommand {
     public final Type type;
+    public final byte[] data;
 
     public AntennaCommand(Type type, byte[] data) {
         this.type = type;
+
+        assert type.getLength() == -1 || type.getLength() == data.length;
         this.data = data;
     }
 
-    public final byte[] data;
-
-    public AntennaCommand(Type type, int... data) {
+    public AntennaCommand(AntennaCommand.Type type, int... data) {
         this.type = type;
 
-        ByteBuffer d = ByteBuffer.allocate(data.length * (Integer.SIZE / Byte.SIZE));
+        assert type.getLength() == data.length * Integer.BYTES;
+
+        ByteBuffer d = ByteBuffer.allocate(type.getLength());
         for (int arg : data) {
             d.putInt(arg);
         }
@@ -27,12 +30,23 @@ public class AntennaCommand {
         this.data = d.array();
     }
 
-    public static AntennaCommand fromArray(byte[] raw) {
-        ByteBuffer b = ByteBuffer.wrap(raw);
-
+    public static AntennaCommand readFromBuffer(ByteBuffer b) {
         byte code = b.get();
-        byte[] data = new byte[b.remaining()];
-        b.get(data);
+
+        AntennaCommand.Type type = AntennaCommand.Type.fromCode(code);
+        int length = type.getLength();
+        byte[] data;
+
+        if (length == -1) {
+            byte code2 = b.get();
+            int code2length = AntennaCommand.Type.fromCode(code2).getLength();
+            data = new byte[1 + code2length];
+            data[0] = code2;
+            b.get(data, 1, code2length);
+        } else {
+            data = new byte[length];
+            b.get(data);
+        }
 
         return new AntennaCommand(AntennaCommand.Type.fromCode(code), data);
     }
@@ -57,11 +71,11 @@ public class AntennaCommand {
 
     public enum Type {
         /* COMMANDS */
-        G0(0x01),
-        T0(0x03),
-        A0(0x05),
-        POWERON(0x08),
-        POWEROFF(0x09);
+        G0(0x01, 8),
+        T0(0x03, 1),
+        A0(0x05, 1),
+        POWERON(0x08, 0),
+        POWEROFF(0x09, 0);
 
         private static final Map<Byte, AntennaCommand.Type> codeToTypeMap = new HashMap<>();
 
@@ -72,9 +86,11 @@ public class AntennaCommand {
         }
 
         private byte code;
+        private int length;
 
-        Type(int code) {
+        Type(int code, int length) {
             this.code = (byte) code;
+            this.length = length;
         }
 
         public static AntennaCommand.Type fromCode(byte code) {
@@ -83,6 +99,10 @@ public class AntennaCommand {
 
         public byte getCode() {
             return code;
+        }
+
+        public int getLength() {
+            return length;
         }
     }
 }
