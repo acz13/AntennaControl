@@ -3,6 +3,7 @@ package me.alchzh.antenna_control.controller;
 import me.alchzh.antenna_control.device.AntennaCommand;
 import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaEvent;
+import me.alchzh.antenna_control.util.Units;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,10 +35,6 @@ public class AntennaScript {
 
             instructions.add(instruction);
         }
-    }
-
-    public static int d(double degrees) {
-        return (int) (degrees * (Integer.MAX_VALUE / 180.0));
     }
 
     @Override
@@ -110,7 +107,7 @@ public class AntennaScript {
                     case "G0":
                         int[] intArr = instr.arguments.stream()
                                 .mapToInt(Integer::parseInt)
-                                .map(AntennaScript::d)
+                                .map(Units::u)
                                 .toArray();
 
                         AntennaDevice.Listener notifier = (AntennaEvent event) -> {

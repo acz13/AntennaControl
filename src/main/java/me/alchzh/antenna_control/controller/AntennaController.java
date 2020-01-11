@@ -19,6 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static me.alchzh.antenna_control.util.Units.d;
+
 class AntennaController {
     public static final DateTimeFormatter dtf =
             DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss.SSS ");
@@ -50,14 +52,6 @@ class AntennaController {
             String log = process(event);
             System.out.printf("%s %s\n", getFormattedTime(event.time), log);
         });
-    }
-
-    public static int u(double degrees) {
-        return (int) (degrees * (Integer.MAX_VALUE / 180.0));
-    }
-
-    public static double d(int units) {
-        return units * 180.0 / Integer.MAX_VALUE;
     }
 
     public static void main(String[] args) throws IOException {

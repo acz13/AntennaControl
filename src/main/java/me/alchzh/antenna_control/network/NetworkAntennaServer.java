@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import static me.alchzh.antenna_control.util.Units.u;
+
 /**
  * A server that wraps an AntennaDevice to communicate over a TCP socket
  */
@@ -28,14 +30,6 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
         device.addEventListener(this);
 
         serverSocket = ServerSocketChannel.open();
-    }
-
-    public static int u(double degrees) {
-        return (int) (degrees * (Integer.MAX_VALUE / 180.0));
-    }
-
-    public static double d(int units) {
-        return units * 180.0 / Integer.MAX_VALUE;
     }
 
     public static void main(String[] args) throws IOException {
