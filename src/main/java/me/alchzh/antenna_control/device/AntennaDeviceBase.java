@@ -1,16 +1,14 @@
 package me.alchzh.antenna_control.device;
 
-import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Thread safe event listener implementation of AntennaDevice
+ */
 public abstract class AntennaDeviceBase implements AntennaDevice {
     private final Object MONITOR = new Object();
     private Set<AntennaDevice.Listener> listeners;
-
-    protected void sendRaw(byte[] data) {
-        sendEvent(AntennaEvent.readFromBuffer(ByteBuffer.wrap(data)));
-    }
 
     /**
      * Sends a regular (data) event to every registered listener

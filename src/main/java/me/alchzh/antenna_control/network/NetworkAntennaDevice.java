@@ -17,6 +17,13 @@ public class NetworkAntennaDevice extends AntennaDeviceBase implements Runnable 
     private ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
     private ByteBuffer readBuffer = ByteBuffer.allocate(1024);
 
+    /**
+     * Connects to a device wrapped in a NetworkAntennaServer
+     *
+     * @param host Host to bind to
+     * @param port Port to listen on
+     * @throws IOException On any IOException
+     */
     public NetworkAntennaDevice(String host, int port) throws IOException {
         client = SocketChannel.open();
 
@@ -81,7 +88,7 @@ public class NetworkAntennaDevice extends AntennaDeviceBase implements Runnable 
     @Override
     public void submitCommand(AntennaCommand command) {
         writeBuffer.clear();
-        writeBuffer.put(command.toArray());
+        writeBuffer.put(command.toByteBuffer());
         writeBuffer.put((byte) 0x0A);
         writeBuffer.flip();
 

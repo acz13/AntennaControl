@@ -1,5 +1,9 @@
 package me.alchzh.antenna_control.device;
 
+/**
+ * Interface representing an AntennaDevice
+ * Essentially functions as a two way event bus with listeners
+ */
 public interface AntennaDevice {
     /**
      * Submits a command to the device
@@ -42,6 +46,9 @@ public interface AntennaDevice {
      */
     void removeEventListener(AntennaDevice.Listener listener);
 
+    /**
+     * A listener for the event (registered with addEventListener) that can be used with lambdas
+     */
     @FunctionalInterface
     interface Listener {
         /**

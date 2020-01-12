@@ -21,14 +21,29 @@ import java.util.concurrent.Future;
 
 import static me.alchzh.antenna_control.util.Units.d;
 
-class AntennaController {
+/**
+ * Controls a device by running scripts and outputting to log
+ */
+public class AntennaController {
+    /**
+     * The default log time format
+     */
     public static final DateTimeFormatter dtf =
             DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss.SSS ");
 
     private final AntennaDevice device;
+    /**
+     * The ExecutorService that spawns the script runner thread
+     */
     private final ExecutorService es = Executors.newSingleThreadExecutor();
-    private ZonedDateTime baseTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC"));
+    /**
+     * Future representing the running script
+     */
     private Future<?> sf;
+    /**
+     * The baseTime is initially set to unix epoch before the device updates us
+     */
+    private ZonedDateTime baseTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC"));
 
     private int az;
     private int el;
@@ -45,15 +60,25 @@ class AntennaController {
     private int speed;
 
 
+    /**
+     * @param device The device to control
+     */
     public AntennaController(AntennaDevice device) {
         this.device = device;
 
+        // Add our logging event listener
         device.addEventListener((AntennaEvent event) -> {
-            String log = process(event);
+            String log = makeLogString(event);
             System.out.printf("%s %s\n", getFormattedTime(event.time), log);
         });
     }
 
+    /**
+     * Launches a controller with the configured AntennaDevice as a console application
+     *
+     * @param args Command line arguments
+     * @throws IOException On any IOException
+     */
     public static void main(String[] args) throws IOException {
 //        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
         AntennaDevice device = new NetworkAntennaDevice("127.0.0.1", 52532);
@@ -62,16 +87,25 @@ class AntennaController {
 
         BufferedReader in
                 = new BufferedReader(new FileReader("INPUT"));
+        // AntennaScript can parse from any BufferedReader
         AntennaScript script = new AntennaScript(in);
 
         controller.runScript(script);
         System.exit(0);
     }
 
-    private String process(AntennaEvent event) {
+    /**
+     * Properly formats the log output for every event type
+     * Located under AntennaController as it is an logging implementation detail
+     *
+     * @param event The event to log
+     * @return Formatted log output
+     */
+    private String makeLogString(AntennaEvent event) {
         ByteBuffer b = ByteBuffer.wrap(event.data);
 
         switch (event.type) {
+            // Every case should end in a return; break is unnecessary
             case BASE_TIME:
                 long millis = b.getLong();
                 baseTime = ZonedDateTime.ofInstant(
@@ -117,16 +151,28 @@ class AntennaController {
                 el = b.getInt();
 
                 return String.format("Move finished. Current location: (%.3f, %.3f)", d(az), d(el));
-
             default:
+                // Prepend "Error: " to any errors so we don't need to redefine this every time
                 return (event.isError() ? "Error: " : "") + event;
         }
     }
 
+    /**
+     * Formats a given time in milliseconds after baseTime
+     *
+     * @param time Time in milliseconds after the baseTime
+     * @return Formatted time string
+     */
     private String getFormattedTime(int time) {
         return dtf.format(baseTime.plus(Duration.ofMillis(time)));
     }
 
+    /**
+     * Runs script in thread. Power on the device before the script runs. Script itself doesn't necessarily
+     * have to begin from a base state.
+     *
+     * @param script A script to run.
+     */
     public void runScript(AntennaScript script) {
         poweron();
         sf = es.submit(script.attach(device));
@@ -136,17 +182,28 @@ class AntennaController {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+
+        // For testing only. Remove for actual application.
         poweroff();
     }
 
+    /**
+     * Stop a currently running script immediately
+     */
     public void cancelScript() {
         sf.cancel(true);
     }
 
+    /**
+     * Power on the device
+     */
     public void poweron() {
         device.submitCommand(AntennaCommand.Type.POWERON);
     }
 
+    /**
+     * Power off the device
+     */
     public void poweroff() {
         device.submitCommand(AntennaCommand.Type.POWEROFF);
     }

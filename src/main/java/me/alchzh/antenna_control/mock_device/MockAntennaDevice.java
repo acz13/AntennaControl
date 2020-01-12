@@ -11,11 +11,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A mock of a real antenna meant to simulate a real device for testing
+ * Mocks a real Antenna device for testing
  */
 public class MockAntennaDevice extends AntennaDeviceBase {
     /**
-     * The speed (in units / millisecond) that the sky drifts
+     * The speed (in units / millisecond) that the sky drifts at
      */
     public static final double DRIFT_FACTOR = ((double) Integer.MAX_VALUE) / (180 * 240);
     private final int baseAz;

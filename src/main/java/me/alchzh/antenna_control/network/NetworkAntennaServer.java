@@ -25,6 +25,12 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
     private ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
     private ByteBuffer readBuffer = ByteBuffer.allocate(1024);
 
+    /**
+     * Wraps a device to serve over a network
+     *
+     * @param device Device to wrap
+     * @throws IOException On any IOException
+     */
     public NetworkAntennaServer(AntennaDevice device) throws IOException {
         this.device = device;
         device.addEventListener(this);
@@ -32,6 +38,12 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
         serverSocket = ServerSocketChannel.open();
     }
 
+    /**
+     * Spins up a server using MockAntennaDevice to listen on port 52532
+     *
+     * @param args Command line arguments
+     * @throws IOException On any IOException
+     */
     public static void main(String[] args) throws IOException {
         AntennaDevice mockAntenna = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
         NetworkAntennaServer server = new NetworkAntennaServer(mockAntenna);
@@ -76,6 +88,14 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
         return new AntennaCommand(type, data);
     }
 
+    /**
+     * Listen on the specified host and port
+     * At the moment, accepts only one client connection and reads command by command
+     *
+     * @param host Host to bind to
+     * @param port Port to listen on
+     * @throws IOException On any IOException
+     */
     public void listen(String host, int port) throws IOException {
         serverSocket.socket().bind(new InetSocketAddress(host, port));
         System.out.printf("Listening on... %s:%d\n", host, port);
