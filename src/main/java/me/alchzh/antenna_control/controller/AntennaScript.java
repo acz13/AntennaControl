@@ -166,30 +166,27 @@ public class AntennaScript {
                     case "#":
                         break;
                     case "GOTO":
-                        String label = instr.arguments.get(0);
-                        scCursor = labels.get(label);
+                        String LABEL = instr.arguments.get(0);
+                        scCursor = labels.get(LABEL);
                         continue;
                     case "EXIT":
                         return null;
                     case "G0":
-                        // Maps strings to integers
-                        int[] intArr = instr.arguments.stream()
-                                .mapToInt(Integer::parseInt)
-                                .map(Units::u)
-                                .toArray();
+                        int AZ = Integer.parseInt(instr.arguments.get(0));
+                        int EL = Integer.parseInt(instr.arguments.get(1));
 
                         // Unfreezes the script when a MOVE_FINISHED event is received
                         AntennaDevice.Listener notifier = (AntennaEvent event) -> {
                             synchronized (instr) {
-                                if (event.type == AntennaEvent.Type.MOVE_FINISHED) {
-                                    System.out.println("unlocking");
+                                if (event.type == AntennaEvent.Type.MOVE_FINISHED
+                                    || event.type == AntennaEvent.Type.MOVE_CANCELED) {
                                     instr.notify();
                                 }
                             }
                         };
 
                         device.addEventListener(notifier);
-                        device.submitCommand(AntennaCommand.Type.G0, intArr);
+                        device.submitCommand(AntennaCommand.Type.G0, AZ, EL);
 
                         // Freezes the script runner until a MOVE_FINISHED event is received.
                         synchronized (instr) {
