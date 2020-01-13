@@ -3,7 +3,6 @@ package me.alchzh.antenna_control.controller;
 import me.alchzh.antenna_control.device.AntennaCommand;
 import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaEvent;
-import me.alchzh.antenna_control.util.Units;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +12,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static me.alchzh.antenna_control.util.Units.d;
+import static me.alchzh.antenna_control.util.Units.u;
 
 /**
  * An abstract, runnable representation of a script
@@ -28,6 +30,9 @@ import java.util.stream.Collectors;
  * </ul>
  */
 public class AntennaScript {
+    private static final Pattern unitsPattern = Pattern.compile("^(\\d+)u$");
+    private static final Pattern degreesPattern = Pattern.compile("^(\\d+(\\.\\d*)?)d?$");
+
     /**
      * The list of instructions represents the entire script (no code blocks).
      */
@@ -70,86 +75,110 @@ public class AntennaScript {
                 .collect(Collectors.joining(" "));
     }
 
-    /**
-     * A single instruction in a script. Each instruction is in the form of a command and a list of arguments.
+
+    /** Creates a new runner from this script attached to the device
+     * @param controller Device to attach to
+     * @return Runner (callable) that runs the script on this device in a new thread.
      */
-    static class AntennaScriptInstruction {
-        /**
-         * Pattern that recognizes every valid token in a line
-         */
-        public static final Pattern pattern = Pattern.compile("([#A-Z_0-9.]+)");
-
-        /**
-         * Specifies the action of the instruction.
-         */
-        public final String command;
-        /**
-         * Additional arguments to be passed
-         */
-        public final List<String> arguments;
-
-        /**
-         * Parses an instruction from valid tokens in a line
-         *
-         * @param line Line of script file to parse
-         */
-        public AntennaScriptInstruction(String line) {
-            // Match valid tokens
-            Matcher m = pattern.matcher(line);
-
-            // Finds the first valid token. Sets that as the command.
-            if (!m.find()) {
-                // Empty instruction (blank or no valid tokens)
-                command = "";
-                arguments = Collections.emptyList();
-                return;
-            }
-
-            // m.group(1) returns our entire first match as a string since the capture group is the entire pattern.
-            command = m.group(1);
-
-            // Add arguments into temporary list and freeze it afterward
-            ArrayList<String> tmpArguments = new ArrayList<>();
-            while (m.find()) {
-                tmpArguments.add(m.group(1).toUpperCase());
-            }
-
-            // Prevent list from being modified
-            arguments = Collections.unmodifiableList(tmpArguments);
-        }
-
-        @Override
-        public String toString() {
-            return command + " " + String.join(" ", arguments);
-        }
-    }
-
-
-    /**
-     * @param device Device to attach to
-     * @return Creates a new runner from this script attached to the device.
-     */
-    public AntennaScriptRunner attach(AntennaDevice device) {
-        return new AntennaScriptRunner(device);
+    public AntennaScriptRunner attach(AntennaController controller) {
+        return new AntennaScriptRunner(controller);
     }
 
     /**
      * AntennaScriptRunner attaches to a device and is the Callable that the script runs as in a thread
      */
-    class AntennaScriptRunner implements Callable<Void> {
+    private class AntennaScriptRunner implements Callable<Void> {
         /**
          * scCursor represents the current index in the instructions to execute
          */
         private int scCursor = 0;
+        private final AntennaController controller;
         private final AntennaDevice device;
+        private final Map<String, Integer> variables = new HashMap<>();
+        private final Map<String, Double> positions = new HashMap<>();
+
 
         /**
          * Create AntennaScriptRunner to run on specified device
          *
-         * @param device Device to run commands on
+         * @param controller Device to run commands on
          */
-        public AntennaScriptRunner(AntennaDevice device) {
-            this.device = device;
+        public AntennaScriptRunner(AntennaController controller) {
+            this.controller = controller;
+            this.device = controller.getDevice();
+        }
+
+
+        /**
+         * Get the position degrees presented by a specific argument
+         * TODO: move this to the parser somehow
+         *
+         * @param argument The argument
+         * @return Position (degrees) it represents
+         */
+        private double getPosition(String argument) {
+            if (argument == null) {
+                throw new IllegalArgumentException("Something went very, very wrong");
+            }
+
+            switch (argument) {
+                case "AZ":
+                    return d(controller.getAz());
+                case "El":
+                    return d(controller.getEl());
+                case "BASE_AZ":
+                    return d(controller.getBaseAz());
+                case "BASE_EL":
+                    return d(controller.getBaseEl());
+            }
+
+            Matcher unitMatcher;
+            if ((unitMatcher = unitsPattern.matcher(argument)).matches()) {
+                return d(Integer.parseInt(unitMatcher.group(1)));
+            }
+
+            Matcher degreesMatcher;
+            if ((degreesMatcher = degreesPattern.matcher(argument)).matches()) {
+                return Double.parseDouble(degreesMatcher.group(1));
+            }
+
+            Double fromVar;
+            if ((fromVar = positions.get(argument)) != null) {
+                return fromVar;
+            }
+
+            throw new IllegalArgumentException("Not a position " + argument);
+        }
+
+        /**
+         * Get the integer presented by a specific argument
+         * TODO: move this to the parser somehow
+         *
+         * @param argument The argument
+         * @return Integer it represents
+         */
+        public int getInteger(String argument) {
+            if (argument == null) {
+                throw new IllegalArgumentException("Something went very, very wrong");
+            }
+
+            switch (argument) {
+                case "TIME":
+                    return controller.getTime();
+                case "LAST_TIME":
+                    return controller.getLastEventTime();
+            }
+
+            try {
+                return Integer.parseInt(argument);
+            } catch (NumberFormatException e) {
+                Integer fromVar;
+                if ((fromVar = variables.get(argument)) != null) {
+                    return fromVar;
+                }
+            }
+
+            throw new IllegalArgumentException("Not an integer " + argument);
         }
 
         @Override
@@ -160,33 +189,25 @@ public class AntennaScript {
 
                 System.out.println(instr);
 
+                List<String> args = instr.arguments;
                 switch (instr.command) {
-                    case "LABEL":
-                    case "":
-                    case "#":
-                        break;
-                    case "GOTO":
-                        String LABEL = instr.arguments.get(0);
-                        scCursor = labels.get(LABEL);
-                        continue;
-                    case "EXIT":
-                        return null;
-                    case "G0":
-                        int AZ = Integer.parseInt(instr.arguments.get(0));
-                        int EL = Integer.parseInt(instr.arguments.get(1));
+                    // DEVICE COMMANDS
+                    case "G0": {
+                        double AZ = getPosition(args.get(0));
+                        double EL = getPosition(args.get(1));
 
                         // Unfreezes the script when a MOVE_FINISHED event is received
                         AntennaDevice.Listener notifier = (AntennaEvent event) -> {
                             synchronized (instr) {
                                 if (event.type == AntennaEvent.Type.MOVE_FINISHED
-                                    || event.type == AntennaEvent.Type.MOVE_CANCELED) {
+                                        || event.type == AntennaEvent.Type.MOVE_CANCELED) {
                                     instr.notify();
                                 }
                             }
                         };
 
                         device.addEventListener(notifier);
-                        device.submitCommand(AntennaCommand.Type.G0, AZ, EL);
+                        device.submitCommand(AntennaCommand.Type.G0, u(AZ), u(EL));
 
                         // Freezes the script runner until a MOVE_FINISHED event is received.
                         synchronized (instr) {
@@ -196,12 +217,132 @@ public class AntennaScript {
                         }
 
                         break;
+                    }
                     case "T0":
-                        device.submitCommand(AntennaCommand.Type.G0, Byte.parseByte(instr.arguments.get(0)));
+                        device.submitCommand(AntennaCommand.Type.G0, (byte) getInteger(args.get(0)));
                         break;
-                    case "WAIT":
-                        TimeUnit.MILLISECONDS.sleep(Long.parseLong(instr.arguments.get(0)));
+
+                    // SCRIPTING LANGUAGE FEATURES
+                    case "LABEL":
+                    case "":
+                    case "#":
                         break;
+                    case "GOTO": {
+                        String LABEL = args.get(0);
+                        scCursor = labels.get(LABEL);
+                        continue;
+                    }
+                    case "GOTOIF": {
+                        if (getInteger(args.get(0)) > 0) {
+                            String LABEL = args.get(1);
+                            scCursor = labels.get(LABEL);
+                            continue;
+                        }
+                        break;
+                    }
+                    case "EXIT":
+                        return null;
+                    case "VAR":
+                    case "INT":
+                    case "SETVAR":
+                    case "SETINT":
+                    case "DEFVAR":
+                    case "DEFINT": {
+                        String varName = args.get(0);
+                        if (positions.containsKey(varName)) {
+                            throw new IllegalArgumentException(varName + " is already defined as a position.");
+                        }
+
+                        int varValue = args.size() > 1 ? getInteger(args.get(1)) : 0;
+
+                        variables.put(varName, varValue);
+                        break;
+                    }
+                    case "POS":
+                    case "SETP":
+                    case "DEFP": {
+                        String posName = args.get(0);
+                        if (variables.containsKey(posName)) {
+                            throw new IllegalArgumentException(posName + " is already defined as an integer var.");
+                        }
+
+                        double posValue = args.size() > 1 ? getPosition(args.get(1)) : 0;
+
+                        positions.put(posName, posValue);
+                        break;
+                    }
+                    case "INC":
+                    case "ADD": {
+                        String varName = args.get(0);
+                        variables.put(varName, variables.get(varName) +
+                                (args.size() > 1 ? getInteger(args.get(1)) : 1));
+                        break;
+                    }
+                    case "INCP":
+                    case "ADDP": {
+                        String posName = args.get(0);
+                        positions.put(posName, positions.get(posName) +
+                                (args.size() > 1 ? getInteger(args.get(1)) : 1));
+                        break;
+                    }
+                    case "DEC":
+                    case "SUB": {
+                        String varName = args.get(0);
+                        variables.put(varName, variables.get(varName) -
+                                (args.size() > 1 ? getInteger(args.get(1)) : 1));
+                        break;
+                    }
+                    case "DECP":
+                    case "SUBP": {
+                        String posName = args.get(0);
+                        positions.put(posName, positions.get(posName) -
+                                (args.size() > 1 ? getInteger(args.get(1)) : 1));
+                        break;
+                    }
+                    case "MUL": {
+                        String varName = args.get(0);
+                        variables.put(varName, variables.get(varName) * getInteger(args.get(1)));
+                        break;
+                    }
+                    case "MULP": {
+                        String posName = args.get(0);
+                        positions.put(posName, positions.get(posName) * getPosition(args.get(1)));
+                        break;
+                    }
+                    case "DIV": {
+                        String varName = args.get(0);
+                        variables.put(varName, variables.get(varName) / getInteger(args.get(1)));
+                        break;
+                    }
+                    case "DIVP": {
+                        String posName = args.get(0);
+                        positions.put(posName, positions.get(posName) / getPosition(args.get(1)));
+                        break;
+                    }
+                    case "DIVPI": {
+                        String posName = args.get(0);
+                        positions.put(posName, positions.get(posName) / getInteger(args.get(1)));
+                        break;
+                    }
+                    case "LESS": {
+                        String output = args.size() > 2 ? args.get(2) : "_";
+                        variables.put(output, getInteger(args.get(0)) < getInteger(args.get(1)) ? 1 : 0);
+                        break;
+                    }
+                    case "GREATER": {
+                        String output = args.size() > 2 ? args.get(2) : "_";
+                        variables.put(output, getInteger(args.get(0)) > getInteger(args.get(1)) ? 1 : 0);
+                        break;
+                    }
+                    case "EQUAL": {
+                        String output = args.size() > 2 ? args.get(2) : "_";
+                        variables.put(output, getInteger(args.get(0)) == getInteger(args.get(1)) ? 1 : 0);
+                        break;
+                    }
+                    case "WAIT": {
+                        TimeUnit.MILLISECONDS.sleep(getInteger(args.get(0)));
+                        break;
+                    }
                     default:
                         throw new UnsupportedOperationException(instr.command);
                 }

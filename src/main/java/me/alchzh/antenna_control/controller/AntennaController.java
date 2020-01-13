@@ -14,10 +14,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static me.alchzh.antenna_control.util.Units.d;
 
@@ -58,7 +55,36 @@ public class AntennaController {
     private int maxAz;
     private int maxEl;
     private int speed;
+    private int lastEventTime;
+    private long lastNanoTime;
 
+    public int getAz() {
+        return az;
+    }
+
+    public int getEl() {
+        return el;
+    }
+
+    public int getBaseAz() {
+        return az;
+    }
+
+    public int getBaseEl() {
+        return el;
+    }
+
+    public int getLastEventTime() {
+        return lastEventTime;
+    }
+
+    public int getTime() {
+        return lastEventTime + (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastNanoTime);
+    }
+
+    public AntennaDevice getDevice() {
+        return device;
+    }
 
     /**
      * @param device The device to control
@@ -68,6 +94,9 @@ public class AntennaController {
 
         // Add our logging event listener
         device.addEventListener((AntennaEvent event) -> {
+            lastEventTime = event.time;
+            lastNanoTime = System.nanoTime();
+
             String log = makeLogString(event);
             System.out.printf("%s %s\n", getFormattedTime(event.time), log);
         });
@@ -79,7 +108,7 @@ public class AntennaController {
      * @param args Command line arguments
      * @throws IOException On any IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 //        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
         AntennaDevice device = new NetworkAntennaDevice("127.0.0.1", 52532);
 
@@ -175,7 +204,7 @@ public class AntennaController {
      */
     public void runScript(AntennaScript script) {
         poweron();
-        sf = es.submit(script.attach(device));
+        sf = es.submit(script.attach(this));
         try {
             Object result = sf.get();
             System.out.println(result);

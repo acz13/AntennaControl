@@ -14,20 +14,25 @@ import java.nio.channels.SocketChannel;
  */
 public class NetworkAntennaDevice extends AntennaDeviceBase implements Runnable {
     private SocketChannel client;
-    private ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
-    private ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+    private final ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
+    private final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
 
     /**
      * Connects to a device wrapped in a NetworkAntennaServer
      *
      * @param host Host to bind to
      * @param port Port to listen on
-     * @throws IOException On any IOException
      */
-    public NetworkAntennaDevice(String host, int port) throws IOException {
-        client = SocketChannel.open();
+    public NetworkAntennaDevice(String host, int port) throws InterruptedException {
+        do {
+            try {
+                client = SocketChannel.open();
 
-        client.connect(new InetSocketAddress(host, port));
+                client.connect(new InetSocketAddress(host, port));
+            } catch (IOException e) {
+                Thread.sleep(5000);
+            }
+        } while (client == null || !client.isConnected());
 
         new Thread(this, "Read loop").start();
     }

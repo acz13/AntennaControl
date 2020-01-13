@@ -17,13 +17,13 @@ import static me.alchzh.antenna_control.util.Units.u;
  * A server that wraps an AntennaDevice to communicate over a TCP socket
  */
 public class NetworkAntennaServer implements AntennaDevice.Listener {
-    private AntennaDevice device;
+    private final AntennaDevice device;
 
     private ServerSocketChannel serverSocket;
     private SocketChannel client;
 
-    private ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
-    private ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+    private final ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
+    private final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
 
     /**
      * Wraps a device to serve over a network
@@ -45,7 +45,7 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
      * @throws IOException On any IOException
      */
     public static void main(String[] args) throws IOException {
-        AntennaDevice mockAntenna = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
+        AntennaDevice mockAntenna = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(100 / 1000.0));
         NetworkAntennaServer server = new NetworkAntennaServer(mockAntenna);
 
         server.listen("127.0.0.1", 52532);
