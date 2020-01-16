@@ -51,6 +51,7 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
         server.listen("127.0.0.1", 52532);
     }
 
+
     private void read(int length) throws IOException {
         readBuffer.rewind();
         readBuffer.limit(length);
@@ -100,8 +101,10 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
         serverSocket.socket().bind(new InetSocketAddress(host, port));
         System.out.printf("Listening on... %s:%d\n", host, port);
         client = serverSocket.accept();
+        System.out.printf("Client obtained %s", client.getRemoteAddress());
 
-        while (true) {
+
+        while (client.isConnected()) {
             try {
                 AntennaCommand command = readCommand();
                 System.out.println(command);
@@ -114,6 +117,11 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
         }
     }
 
+    public void close() throws IOException {
+        if (client != null) {
+            client.close();
+        }
+    }
 
     @Override
     public void eventOccurred(AntennaEvent event) {

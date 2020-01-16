@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.concurrent.*;
 
 import static me.alchzh.antenna_control.util.Units.d;
@@ -37,6 +38,7 @@ public class AntennaController {
      * Future representing the running script
      */
     private Future<?> sf;
+    private AntennaScript.AntennaScriptRunner activeRunner;
     /**
      * The baseTime is initially set to unix epoch before the device updates us
      */
@@ -203,17 +205,20 @@ public class AntennaController {
      * @param script A script to run.
      */
     public void runScript(AntennaScript script) {
-        poweron();
-        sf = es.submit(script.attach(this));
-        try {
-            Object result = sf.get();
-            System.out.println(result);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+        if (activeRunner != null) {
+            stop();
         }
 
-        // For testing only. Remove for actual application.
-        poweroff();
+        activeRunner = script.attach(this);
+        sf = es.submit(activeRunner);
+    }
+
+    /**
+     * Stop a currently running script (waiting until next loop)
+     */
+    public void stop() {
+        activeRunner.stop();
+        activeRunner = null;
     }
 
     /**

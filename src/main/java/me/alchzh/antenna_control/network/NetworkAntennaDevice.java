@@ -78,7 +78,7 @@ public class NetworkAntennaDevice extends AntennaDeviceBase implements Runnable 
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!Thread.currentThread().isInterrupted() && client.isConnected()) {
             try {
                 AntennaEvent event = readEvent();
 

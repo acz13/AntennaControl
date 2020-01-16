@@ -87,7 +87,7 @@ public class AntennaScript {
     /**
      * AntennaScriptRunner attaches to a device and is the Callable that the script runs as in a thread
      */
-    private class AntennaScriptRunner implements Callable<Void> {
+    public class AntennaScriptRunner implements Callable<Void> {
         /**
          * scCursor represents the current index in the instructions to execute
          */
@@ -96,6 +96,7 @@ public class AntennaScript {
         private final AntennaDevice device;
         private final Map<String, Integer> variables = new HashMap<>();
         private final Map<String, Double> positions = new HashMap<>();
+        private boolean stopped = false;
 
 
         /**
@@ -103,7 +104,7 @@ public class AntennaScript {
          *
          * @param controller Device to run commands on
          */
-        public AntennaScriptRunner(AntennaController controller) {
+        private AntennaScriptRunner(AntennaController controller) {
             this.controller = controller;
             this.device = controller.getDevice();
         }
@@ -181,10 +182,14 @@ public class AntennaScript {
             throw new IllegalArgumentException("Not an integer " + argument);
         }
 
+        public void stop() {
+            stopped = true;
+        }
+
         @Override
         public Void call() throws InterruptedException {
             // while we haven't reached the end of the script
-            while (scCursor < instructions.size()) {
+            while (scCursor < instructions.size() && !stopped) {
                 AntennaScriptInstruction instr = instructions.get(scCursor);
 
                 System.out.println(instr);
