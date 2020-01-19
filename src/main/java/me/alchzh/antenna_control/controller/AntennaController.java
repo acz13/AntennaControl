@@ -2,6 +2,7 @@ package me.alchzh.antenna_control.controller;
 
 import me.alchzh.antenna_control.device.AntennaCommand;
 import me.alchzh.antenna_control.device.AntennaDevice;
+import me.alchzh.antenna_control.device.EventEmitterImpl;
 import me.alchzh.antenna_control.device.AntennaEvent;
 import me.alchzh.antenna_control.network.NetworkAntennaDevice;
 
@@ -14,7 +15,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
 import java.util.concurrent.*;
 
 import static me.alchzh.antenna_control.util.Units.d;
@@ -22,7 +22,7 @@ import static me.alchzh.antenna_control.util.Units.d;
 /**
  * Controls a device by running scripts and outputting to log
  */
-public class AntennaController {
+public class AntennaController extends EventEmitterImpl<AntennaEvent> {
     /**
      * The default log time format
      */
@@ -98,6 +98,8 @@ public class AntennaController {
         device.addEventListener((AntennaEvent event) -> {
             lastEventTime = event.time;
             lastNanoTime = System.nanoTime();
+
+            sendEvent(event);
 
             String log = makeLogString(event);
             System.out.printf("%s %s\n", getFormattedTime(event.time), log);
@@ -182,6 +184,7 @@ public class AntennaController {
                 el = b.getInt();
 
                 return String.format("Move finished. Current location: (%.3f, %.3f)", d(az), d(el));
+            case MEASUREMENT:
             default:
                 // Prepend "Error: " to any errors so we don't need to redefine this every time
                 return (event.isError() ? "Error: " : "") + event;

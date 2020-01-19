@@ -1,19 +1,17 @@
 package me.alchzh.antenna_control.mock_device;
 
 import me.alchzh.antenna_control.device.AntennaCommand;
-import me.alchzh.antenna_control.device.AntennaDeviceBase;
+import me.alchzh.antenna_control.device.AntennaDevice;
+import me.alchzh.antenna_control.device.EventEmitterImpl;
 import me.alchzh.antenna_control.device.AntennaEvent;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Mocks a real Antenna device for testing
  */
-public class MockAntennaDevice extends AntennaDeviceBase {
+public class MockAntennaDevice extends EventEmitterImpl<AntennaEvent> implements AntennaDevice {
     /**
      * The speed (in units / millisecond) that the sky drifts at
      */
@@ -25,8 +23,16 @@ public class MockAntennaDevice extends AntennaDeviceBase {
     private final int maxAz;
     private final int maxEl;
     private final int speed;
+
+    private int sensorAz;
+    private int sensorEl;
+    private final int sensorInterval = 5000;
+    private final int sensorCount = 96;
+    private final MockDataGenerator sensorDataGen = new MockDataGenerator(120, 5, 8);
+
     private ScheduledExecutorService ses;
-    private ScheduledFuture<?> sf;
+    private ScheduledFuture<?> sendStateSF;
+    private ScheduledFuture<?> dataCollectSF;
     private boolean poweredOn = false;
     private long baseNanoTime;
     private long moveStartTime = -1;
@@ -75,6 +81,7 @@ public class MockAntennaDevice extends AntennaDeviceBase {
         return (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - since);
     }
 
+    @Override
     public void submitCommand(AntennaCommand command) {
         if (command.type != AntennaCommand.Type.POWERON) {
             if (!poweredOn) {
@@ -89,10 +96,11 @@ public class MockAntennaDevice extends AntennaDeviceBase {
 
         switch (command.type) {
             case POWERON:
-                if (ses == null) {
+                if (ses == null || ses.isShutdown()) {
                     ses = Executors.newScheduledThreadPool(
-                            1, r -> new Thread(r, "sendStateThread")
+                            2, r -> new Thread(r, "mockAntennaDevice")
                     );
+                    ((ScheduledThreadPoolExecutor) ses).setRemoveOnCancelPolicy(true);
                 }
 
                 poweredOn = true;
@@ -104,12 +112,12 @@ public class MockAntennaDevice extends AntennaDeviceBase {
                 baseSysTimeBA = tb.array();
 
                 sendControlInfo();
-                sf = ses.scheduleAtFixedRate(this::sendState, 0, 1000, TimeUnit.MILLISECONDS);
+                sendStateSF = ses.scheduleAtFixedRate(this::sendState, 0, 1000, TimeUnit.MILLISECONDS);
 
                 break;
             case POWEROFF:
                 poweredOn = false;
-                sf.cancel(true);
+                sendStateSF.cancel(true);
                 ses.shutdownNow();
                 break;
             case G0:
@@ -132,6 +140,16 @@ public class MockAntennaDevice extends AntennaDeviceBase {
                 break;
             case T0:
                 tracking = b.get() != 0;
+                break;
+            case A0:
+                boolean on = b.get() != 0;
+                if (on) {
+                    if (dataCollectSF == null || dataCollectSF.isCancelled() || dataCollectSF.isDone()) {
+                        dataCollectSF = ses.scheduleAtFixedRate(this::sendData, 0, 5000, TimeUnit.MILLISECONDS);
+                    } else {
+                        dataCollectSF.cancel(true);
+                    }
+                }
                 break;
             default:
                 send(AntennaEvent.Type.UNKNOWN_COMMAND_ERROR, command.type.getCode());
@@ -180,6 +198,29 @@ public class MockAntennaDevice extends AntennaDeviceBase {
         try {
             updatePos();
             send(AntennaEvent.Type.CURRENT_STATE, az, el, destAz, destEl);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendData() {
+        try {
+            sendState();
+
+            if (az != sensorAz || el != sensorEl) {
+                sensorDataGen.getNewMean();
+                sensorAz = az;
+                sensorEl = el;
+            }
+
+            ByteBuffer measurementBuffer = ByteBuffer.allocate(Integer.BYTES + sensorCount * Float.BYTES);
+            measurementBuffer.putInt(sensorCount);
+            for (int i = 0; i < sensorCount; i++) {
+                measurementBuffer.putFloat(sensorDataGen.collectData());
+            }
+
+            measurementBuffer.flip();
+            send(AntennaEvent.Type.MEASUREMENT, measurementBuffer.array());
         } catch (Exception e) {
             e.printStackTrace();
         }

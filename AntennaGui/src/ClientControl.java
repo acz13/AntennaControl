@@ -2,9 +2,11 @@ import me.alchzh.antenna_control.controller.AntennaController;
 import me.alchzh.antenna_control.controller.AntennaScript;
 import me.alchzh.antenna_control.controller.AntennaScriptInstruction;
 import me.alchzh.antenna_control.device.AntennaDevice;
+import me.alchzh.antenna_control.device.AntennaEvent;
 import me.alchzh.antenna_control.network.NetworkAntennaDevice;
 
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.io.*;
 
 public class ClientControl {
@@ -20,6 +22,8 @@ public class ClientControl {
     private JSpinner portSpinner;
     private JButton connectButton;
 
+    private MeasurementMonitor mm;
+
     private AntennaDevice device;
     private AntennaController controller;
 
@@ -32,6 +36,16 @@ public class ClientControl {
             System.out.println("Attempting to connect");
             device = new NetworkAntennaDevice(hostField.getText(), (Integer) portSpinner.getValue());
             controller = new AntennaController(device);
+
+            controller.addEventListener((AntennaEvent event) -> {
+                if (event.type == AntennaEvent.Type.MEASUREMENT) {
+                    if (mm == null) {
+                        mm = MeasurementMonitor.showMeasurementFrame();
+                    }
+
+                    mm.addMeasurement(controller.getAz(), controller.getEl(), event.data);
+                }
+            });
         } catch (InterruptedException e) { e.printStackTrace(); }
     }
 
@@ -47,6 +61,8 @@ public class ClientControl {
     }
 
     private void createUIComponents() {
+        controllerTextArea = new LogArea();
+
         portSpinner = new JSpinner();
         portSpinner.setValue(52532);
         JSpinner.NumberEditor editor = new JSpinner.NumberEditor(portSpinner, "#");
@@ -54,12 +70,16 @@ public class ClientControl {
     }
 
     public ClientControl() {
+        DefaultCaret caret = (DefaultCaret) controllerTextArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
         openScriptButton.addActionListener((event) -> {
             String fileName = chooseFile();
             if (fileName != null) {
                 openedScript.setText(fileName);
             }
         });
+
         runScriptButton.addActionListener((event) -> {
             try {
                 BufferedReader in = new BufferedReader(new FileReader(openedScript.getText()));
@@ -71,11 +91,12 @@ public class ClientControl {
                 e.printStackTrace();
             }
         });
+
         submitButton.addActionListener((event) -> {
             AntennaScriptInstruction instruction = new AntennaScriptInstruction(commandField.getText());
         });
-        connectButton.addActionListener((event) -> connect());
 
+        connectButton.addActionListener((event) -> connect());
     }
 
     public static void main(String[] args) {

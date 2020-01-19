@@ -65,15 +65,23 @@ public class AntennaEvent {
         int length = type.getLength();
         byte[] data;
 
-        if (length == -1) {
-            byte code2 = b.get();
-            int code2length = Type.fromCode(code2).getLength();
-            data = new byte[1 + code2length];
-            data[0] = code2;
-            b.get(data, 1, code2length);
-        } else {
-            data = new byte[length];
-            b.get(data);
+        switch (type) {
+            case COMMAND_ISSUED:
+                byte code2 = b.get();
+                b.rewind();
+                int code2length = Type.fromCode(code2).getLength();
+                data = new byte[1 + code2length];
+                b.get(data);
+                break;
+            case MEASUREMENT:
+                int count = b.getInt();
+                b.rewind();
+                data = new byte[Integer.BYTES + Float.BYTES * count];
+                b.get(data);
+                break;
+            default:
+                data = new byte[length];
+                b.get(data);
         }
 
         return new AntennaEvent(type, time, data);

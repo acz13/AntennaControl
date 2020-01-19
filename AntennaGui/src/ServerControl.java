@@ -3,6 +3,8 @@ import me.alchzh.antenna_control.mock_device.MockAntennaDevice;
 import me.alchzh.antenna_control.network.NetworkAntennaServer;
 
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class ServerControl {
     private Thread listenThread;
 
     private void startServer() {
-        device = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(100 / 1000.0));
+        device = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
 
         try {
             server = new NetworkAntennaServer(device);
@@ -51,6 +53,9 @@ public class ServerControl {
     }
 
     public ServerControl() {
+        DefaultCaret caret = (DefaultCaret) serverTextArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
         startServerButton.addActionListener(e -> startServer());
         stopServerButton.addActionListener(e -> stopServer());
     }
@@ -69,6 +74,8 @@ public class ServerControl {
     }
 
     private void createUIComponents() {
+        serverTextArea = new LogArea();
+
         portSpinner = new JSpinner();
         portSpinner.setValue(52532);
         JSpinner.NumberEditor editor = new JSpinner.NumberEditor(portSpinner, "#");

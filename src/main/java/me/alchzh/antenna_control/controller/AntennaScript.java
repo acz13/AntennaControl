@@ -3,6 +3,7 @@ package me.alchzh.antenna_control.controller;
 import me.alchzh.antenna_control.device.AntennaCommand;
 import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaEvent;
+import me.alchzh.antenna_control.device.EventEmitter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -202,7 +203,7 @@ public class AntennaScript {
                         double EL = getPosition(args.get(1));
 
                         // Unfreezes the script when a MOVE_FINISHED event is received
-                        AntennaDevice.Listener notifier = (AntennaEvent event) -> {
+                        EventEmitter.Listener<AntennaEvent> notifier = (AntennaEvent event) -> {
                             synchronized (instr) {
                                 if (event.type == AntennaEvent.Type.MOVE_FINISHED
                                         || event.type == AntennaEvent.Type.MOVE_CANCELED) {
@@ -226,7 +227,9 @@ public class AntennaScript {
                     case "T0":
                         device.submitCommand(AntennaCommand.Type.G0, (byte) getInteger(args.get(0)));
                         break;
-
+                    case "A0":
+                        device.submitCommand(AntennaCommand.Type.A0, (byte) getInteger(args.get(0)));
+                        break;
                     // SCRIPTING LANGUAGE FEATURES
                     case "LABEL":
                     case "":
@@ -314,6 +317,11 @@ public class AntennaScript {
                         positions.put(posName, positions.get(posName) * getPosition(args.get(1)));
                         break;
                     }
+                    case "MULPI": {
+                        String posName = args.get(0);
+                        positions.put(posName, positions.get(posName) * getInteger(args.get(1)));
+                        break;
+                    }
                     case "DIV": {
                         String varName = args.get(0);
                         variables.put(varName, variables.get(varName) / getInteger(args.get(1)));
@@ -334,14 +342,29 @@ public class AntennaScript {
                         variables.put(output, getInteger(args.get(0)) < getInteger(args.get(1)) ? 1 : 0);
                         break;
                     }
+                    case "LESSP": {
+                        String output = args.size() > 2 ? args.get(2) : "_";
+                        variables.put(output, u(getPosition(args.get(0))) < u(getPosition(args.get(1))) ? 1 : 0);
+                        break;
+                    }
                     case "GREATER": {
                         String output = args.size() > 2 ? args.get(2) : "_";
                         variables.put(output, getInteger(args.get(0)) > getInteger(args.get(1)) ? 1 : 0);
                         break;
                     }
+                    case "GREATERP": {
+                        String output = args.size() > 2 ? args.get(2) : "_";
+                        variables.put(output, u(getPosition(args.get(0))) > u(getPosition(args.get(1))) ? 1 : 0);
+                        break;
+                    }
                     case "EQUAL": {
                         String output = args.size() > 2 ? args.get(2) : "_";
                         variables.put(output, getInteger(args.get(0)) == getInteger(args.get(1)) ? 1 : 0);
+                        break;
+                    }
+                    case "EQUALP": {
+                        String output = args.size() > 2 ? args.get(2) : "_";
+                        variables.put(output, u(getInteger(args.get(0))) == u(getInteger(args.get(1))) ? 1 : 0);
                         break;
                     }
                     case "WAIT": {

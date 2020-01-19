@@ -1,7 +1,8 @@
 package me.alchzh.antenna_control.network;
 
 import me.alchzh.antenna_control.device.AntennaCommand;
-import me.alchzh.antenna_control.device.AntennaDeviceBase;
+import me.alchzh.antenna_control.device.AntennaDevice;
+import me.alchzh.antenna_control.device.EventEmitterImpl;
 import me.alchzh.antenna_control.device.AntennaEvent;
 
 import java.io.IOException;
@@ -12,10 +13,10 @@ import java.nio.channels.SocketChannel;
 /**
  * A device that communicates over a TCP socket
  */
-public class NetworkAntennaDevice extends AntennaDeviceBase implements Runnable {
+public class NetworkAntennaDevice extends EventEmitterImpl<AntennaEvent> implements AntennaDevice, Runnable {
     private SocketChannel client;
-    private final ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
-    private final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+    private final ByteBuffer writeBuffer = ByteBuffer.allocate(2048);
+    private final ByteBuffer readBuffer = ByteBuffer.allocate(2048);
 
     /**
      * Connects to a device wrapped in a NetworkAntennaServer
@@ -38,8 +39,13 @@ public class NetworkAntennaDevice extends AntennaDeviceBase implements Runnable 
     }
 
     private void read(int length) throws IOException {
-        readBuffer.rewind();
-        readBuffer.limit(length);
+        readBuffer.clear();
+
+        try {
+            readBuffer.limit(length);
+        } catch (IllegalArgumentException e) {
+            System.out.println(length);
+        }
 
         client.read(readBuffer);
         readBuffer.flip();
@@ -58,19 +64,33 @@ public class NetworkAntennaDevice extends AntennaDeviceBase implements Runnable 
         if (length == 0) {
             data = new byte[0];
             read(1);
-        } else if (length == -1) {
-            read(1);
-            byte code2 = readBuffer.get();
-            int code2length = AntennaCommand.Type.fromCode(code2).getLength();
-            data = new byte[1 + code2length];
-            data[0] = code2;
-
-            read(code2length + 1);
-            readBuffer.get(data, 1, code2length);
         } else {
-            data = new byte[length];
-            read(length + 1);
-            readBuffer.get(data);
+            switch (type) {
+                case COMMAND_ISSUED:
+                    read(1);
+                    byte code2 = readBuffer.get();
+                    int code2length = AntennaCommand.Type.fromCode(code2).getLength();
+                    data = new byte[1 + code2length];
+                    data[0] = code2;
+
+                    read(code2length + 1);
+                    readBuffer.get(data, 1, code2length);
+                    break;
+                case MEASUREMENT:
+                    read(4);
+                    int count = readBuffer.getInt();
+                    readBuffer.rewind();
+                    data = new byte[Integer.BYTES + count * Float.BYTES];
+                    readBuffer.get(data, 0, Integer.BYTES);
+
+                    read(1 + count * Float.BYTES);
+                    readBuffer.get(data, Integer.BYTES, count * Float.BYTES);
+                    break;
+                default:
+                    data = new byte[length];
+                    read(length + 1);
+                    readBuffer.get(data);
+            }
         }
 
         return new AntennaEvent(type, time, data);

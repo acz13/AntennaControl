@@ -6,30 +6,30 @@ import java.util.Set;
 /**
  * Thread safe event listener implementation of AntennaDevice
  */
-public abstract class AntennaDeviceBase implements AntennaDevice {
+public abstract class EventEmitterImpl<T> implements EventEmitter<T> {
     private final Object MONITOR = new Object();
-    private Set<AntennaDevice.Listener> listeners;
+    private Set<Listener<T>> listeners;
 
     /**
      * Sends a regular (data) event to every registered listener
      *
      * @param event Event to send
      */
-    protected void sendEvent(AntennaEvent event) {
-        Set<AntennaDevice.Listener> listenersCopy;
+    protected void sendEvent(T event) {
+        Set<Listener<T>> listenersCopy;
 
         synchronized (MONITOR) {
             if (listeners == null) return;
             listenersCopy = new HashSet<>(listeners);
         }
 
-        for (Listener listener : listenersCopy) {
+        for (Listener<T> listener : listenersCopy) {
             listener.eventOccurred(event);
         }
     }
 
     @Override
-    public void addEventListener(AntennaDevice.Listener listener) {
+    public void addEventListener(Listener<T> listener) {
         if (listener == null) return;
 
         synchronized (MONITOR) {
@@ -42,7 +42,7 @@ public abstract class AntennaDeviceBase implements AntennaDevice {
     }
 
     @Override
-    public void removeEventListener(AntennaDevice.Listener listener) {
+    public void removeEventListener(Listener<T> listener) {
         synchronized (MONITOR) {
             if (listeners != null) listeners.remove(listener);
         }

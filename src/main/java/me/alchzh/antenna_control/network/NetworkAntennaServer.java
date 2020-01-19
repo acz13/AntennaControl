@@ -3,6 +3,7 @@ package me.alchzh.antenna_control.network;
 import me.alchzh.antenna_control.device.AntennaCommand;
 import me.alchzh.antenna_control.device.AntennaDevice;
 import me.alchzh.antenna_control.device.AntennaEvent;
+import me.alchzh.antenna_control.device.EventEmitter;
 import me.alchzh.antenna_control.mock_device.MockAntennaDevice;
 
 import java.io.IOException;
@@ -10,20 +11,21 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.EventListener;
 
 import static me.alchzh.antenna_control.util.Units.u;
 
 /**
  * A server that wraps an AntennaDevice to communicate over a TCP socket
  */
-public class NetworkAntennaServer implements AntennaDevice.Listener {
+public class NetworkAntennaServer implements EventEmitter.Listener<AntennaEvent> {
     private final AntennaDevice device;
 
     private ServerSocketChannel serverSocket;
     private SocketChannel client;
 
-    private final ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
-    private final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+    private final ByteBuffer writeBuffer = ByteBuffer.allocate(2048);
+    private final ByteBuffer readBuffer = ByteBuffer.allocate(2048);
 
     /**
      * Wraps a device to serve over a network
@@ -53,7 +55,7 @@ public class NetworkAntennaServer implements AntennaDevice.Listener {
 
 
     private void read(int length) throws IOException {
-        readBuffer.rewind();
+        readBuffer.clear();
         readBuffer.limit(length);
 
         client.read(readBuffer);

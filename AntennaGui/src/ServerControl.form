@@ -83,15 +83,20 @@
       </grid>
       <scrollpane id="e461a">
         <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="150" height="300"/>
+            <preferred-size width="150" height="300"/>
+          </grid>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <component id="8c2be" class="javax.swing.JTextArea" binding="serverTextArea">
+          <component id="8c2be" class="javax.swing.JTextArea" binding="serverTextArea" custom-create="true">
             <constraints/>
             <properties>
+              <font name="Monospaced"/>
               <text value=""/>
+              <wrapStyleWord value="false"/>
             </properties>
           </component>
         </children>
