@@ -123,6 +123,8 @@ public class AntennaScript {
                 throw new IllegalArgumentException("Something went very, very wrong");
             }
 
+            argument = argument.toUpperCase();
+
             switch (argument) {
                 case "AZ":
                     return d(controller.getAz());
@@ -164,11 +166,17 @@ public class AntennaScript {
                 throw new IllegalArgumentException("Something went very, very wrong");
             }
 
+            argument = argument.toUpperCase();
+
             switch (argument) {
                 case "TIME":
                     return controller.getTime();
                 case "LAST_TIME":
                     return controller.getLastEventTime();
+                case "ON":
+                    return 1;
+                case "OFF":
+                    return 0;
             }
 
             try {
@@ -230,6 +238,8 @@ public class AntennaScript {
                     case "A0":
                         device.submitCommand(AntennaCommand.Type.A0, (byte) getInteger(args.get(0)));
                         break;
+                    case "STOW":
+                        device.submitCommand(AntennaCommand.Type.G0, (byte) 0x00);
                     // SCRIPTING LANGUAGE FEATURES
                     case "LABEL":
                     case "":
