@@ -98,6 +98,7 @@ public class AntennaScript {
         private final Map<String, Integer> variables = new HashMap<>();
         private final Map<String, Double> positions = new HashMap<>();
         private boolean stopped = false;
+        private final Object MOVE_MONITOR = new Object();
 
 
         /**
@@ -195,6 +196,28 @@ public class AntennaScript {
             stopped = true;
         }
 
+        private void g0block(int AZ, int EL) throws InterruptedException {
+            // Unfreezes the script when a MOVE_FINISHED event is received
+            EventEmitter.Listener<AntennaEvent> notifier = (AntennaEvent event) -> {
+                synchronized (MOVE_MONITOR) {
+                    if (event.type == AntennaEvent.Type.MOVE_FINISHED
+                            || event.type == AntennaEvent.Type.MOVE_CANCELED) {
+                        MOVE_MONITOR.notify();
+                    }
+                }
+            };
+
+            device.addEventListener(notifier);
+            device.submitCommand(AntennaCommand.Type.G0, AZ, EL);
+
+            // Freezes the script runner until a MOVE_FINISHED event is received.
+            synchronized (MOVE_MONITOR) {
+                MOVE_MONITOR.wait();
+
+                device.removeEventListener(notifier);
+            }
+        }
+
         @Override
         public Void call() throws InterruptedException {
             // while we haven't reached the end of the script
@@ -210,37 +233,33 @@ public class AntennaScript {
                         double AZ = getPosition(args.get(0));
                         double EL = getPosition(args.get(1));
 
-                        // Unfreezes the script when a MOVE_FINISHED event is received
-                        EventEmitter.Listener<AntennaEvent> notifier = (AntennaEvent event) -> {
-                            synchronized (instr) {
-                                if (event.type == AntennaEvent.Type.MOVE_FINISHED
-                                        || event.type == AntennaEvent.Type.MOVE_CANCELED) {
-                                    instr.notify();
-                                }
-                            }
-                        };
+                        g0block(u(AZ), u(EL));
+                        break;
+                    }
+                    case "G1": {
+                        double AZ = getPosition(args.get(0));
+                        double EL = getPosition(args.get(1));
 
-                        device.addEventListener(notifier);
                         device.submitCommand(AntennaCommand.Type.G0, u(AZ), u(EL));
-
-                        // Freezes the script runner until a MOVE_FINISHED event is received.
-                        synchronized (instr) {
-                            instr.wait();
-
-                            device.removeEventListener(notifier);
-                        }
-
                         break;
                     }
                     case "T0":
-                        device.submitCommand(AntennaCommand.Type.G0, (byte) getInteger(args.get(0)));
+                        device.submitCommand(AntennaCommand.Type.T0, (byte) getInteger(args.get(0)));
                         break;
                     case "A0":
                         device.submitCommand(AntennaCommand.Type.A0, (byte) getInteger(args.get(0)));
                         break;
                     case "STOW":
-                        device.submitCommand(AntennaCommand.Type.G0, (byte) 0x00);
-                    // SCRIPTING LANGUAGE FEATURES
+                        device.submitCommand(AntennaCommand.Type.T0, (byte) 0x00);
+                        g0block(controller.getBaseAz(), controller.getBaseEl());
+                        break;
+                    case "POWERON":
+                        device.submitCommand(AntennaCommand.Type.POWERON);
+                        break;
+                    case "POWEROFF":
+                        device.submitCommand(AntennaCommand.Type.POWEROFF);
+                        break;
+                        // SCRIPTING LANGUAGE FEATURES
                     case "LABEL":
                     case "":
                     case "#":

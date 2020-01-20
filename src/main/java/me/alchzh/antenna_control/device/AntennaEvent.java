@@ -142,7 +142,7 @@ public class AntennaEvent {
         /* RESPONSE EVENTS */
         COMMAND_ISSUED(0x50, -1),
         CURRENT_STATE(0x51, 4 * Integer.BYTES),
-        MOVE_FINISHED(0x52, 4 * Integer.BYTES),
+        MOVE_FINISHED(0x52, 2 * Integer.BYTES),
         MOVE_CANCELED(0x53, 4 * Integer.BYTES),
         MEASUREMENT(0x60, -1),
 

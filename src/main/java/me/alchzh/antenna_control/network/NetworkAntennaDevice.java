@@ -7,6 +7,7 @@ import me.alchzh.antenna_control.device.AntennaEvent;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -104,15 +105,18 @@ public class NetworkAntennaDevice extends EventEmitterImpl<AntennaEvent> impleme
 
                 sendEvent(event);
             } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
+                System.out.println("Connection closed because of error or forced close");
+                break;
             }
         }
     }
 
     @Override
     public void submitCommand(AntennaCommand command) {
-        writeBuffer.clear();
+        if (writeBuffer.position() > 0) {
+            writeBuffer.compact();
+        }
+
         writeBuffer.put(command.toByteBuffer());
         writeBuffer.put((byte) 0x0A);
         writeBuffer.flip();

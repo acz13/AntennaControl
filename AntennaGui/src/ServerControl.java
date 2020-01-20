@@ -32,11 +32,7 @@ public class ServerControl {
             server = new NetworkAntennaServer(device);
 
             listenThread = new Thread(() -> {
-                try {
-                    server.listen(hostField.getText(), (Integer) portSpinner.getValue());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                server.listen(hostField.getText(), (Integer) portSpinner.getValue());
             });
             listenThread.start();
         } catch (IOException e) {

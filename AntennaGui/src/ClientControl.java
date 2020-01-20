@@ -6,21 +6,31 @@ import me.alchzh.antenna_control.device.AntennaEvent;
 import me.alchzh.antenna_control.network.NetworkAntennaDevice;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.DefaultCaret;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
+
+import static me.alchzh.antenna_control.util.Units.d;
 
 public class ClientControl {
     private JPanel mainPanel;
     private JTextArea controllerTextArea;
     private JButton openScriptButton;
     private JTextField openedScript;
-    private JButton submitButton;
-    private JTextField commandField;
     private JButton runScriptButton;
     private JLabel hostLabel;
     private JTextField hostField;
     private JSpinner portSpinner;
     private JButton connectButton;
+    private JTextField azField;
+    private JTextField destAzField;
+    private JTextField baseTimeField;
+    private JTextField elField;
+    private JTextField destElField;
+    private JTextField timeField;
+    private JButton saveLogAsButton;
 
     private MeasurementMonitor mm;
 
@@ -44,9 +54,21 @@ public class ClientControl {
                     }
 
                     mm.addMeasurement(controller.getAz(), controller.getEl(), event.data);
+                } else if (event.type == AntennaEvent.Type.BASE_TIME) {
+                    baseTimeField.setText(AntennaController.dtf.format(controller.getBaseTime()));
                 }
+
+                updateFields();
             });
         } catch (InterruptedException e) { e.printStackTrace(); }
+    }
+
+    private void updateFields() {
+        azField.setText(String.format("%.3f", d(controller.getAz())));
+        elField.setText(String.format("%.3f", d(controller.getEl())));
+        destAzField.setText(String.format("%.3f", d(controller.getDestAz())));
+        destElField.setText(String.format("%.3f", d(controller.getDestEl())));
+        timeField.setText(String.format("%d", controller.getTime()));
     }
 
     private String chooseFile() {
@@ -87,16 +109,13 @@ public class ClientControl {
 
                 controller.poweron();
                 controller.runScript(script);
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         });
 
-        submitButton.addActionListener((event) -> {
-            AntennaScriptInstruction instruction = new AntennaScriptInstruction(commandField.getText());
-        });
-
         connectButton.addActionListener((event) -> connect());
+        saveLogAsButton.addActionListener(e -> saveAs());
     }
 
     public static void main(String[] args) {
@@ -108,11 +127,45 @@ public class ClientControl {
         System.setOut(ps);
         System.setErr(ps);
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setContentPane(cp.mainPanel);
         frame.pack();
 
 
         frame.setVisible(true);
+    }
+
+    public void saveAs() {
+        FileNameExtensionFilter extensionFilter = new FileNameExtensionFilter("Log File", "log");
+        final JFileChooser saveAsFileChooser = new JFileChooser();
+        saveAsFileChooser.setApproveButtonText("Save");
+        saveAsFileChooser.setFileFilter(extensionFilter);
+        int actionDialog = saveAsFileChooser.showOpenDialog(null);
+        if (actionDialog != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        // !! File fileName = new File(SaveAs.getSelectedFile() + ".txt");
+        File file = saveAsFileChooser.getSelectedFile();
+        if (!file.getName().endsWith(".log")) {
+            file = new File(file.getAbsolutePath() + ".log");
+        }
+
+        BufferedWriter outFile = null;
+        try {
+            outFile = new BufferedWriter(new FileWriter(file));
+
+            controllerTextArea.write(outFile);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (outFile != null) {
+                try {
+                    outFile.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

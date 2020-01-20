@@ -15,7 +15,7 @@ public class MockAntennaDevice extends EventEmitterImpl<AntennaEvent> implements
     /**
      * The speed (in units / millisecond) that the sky drifts at
      */
-    public static final double DRIFT_FACTOR = ((double) Integer.MAX_VALUE) / (180 * 240);
+    public static final double DRIFT_FACTOR = ((double) Integer.MAX_VALUE) / (180 * 240000);
     private final int baseAz;
     private final int baseEl;
     private final int minAz;
@@ -39,6 +39,8 @@ public class MockAntennaDevice extends EventEmitterImpl<AntennaEvent> implements
     private long moveTime = -1;
     private long moveFinishedTime = -1;
     private boolean tracking = false;
+    private long trackingStartTime = -1;
+    private long lastTrackTime;
     private int az;
     private int el;
     private int startAz;
@@ -47,6 +49,8 @@ public class MockAntennaDevice extends EventEmitterImpl<AntennaEvent> implements
     private int destEl;
     //    private long baseSysTime;
     private byte[] baseSysTimeBA;
+
+    private final Object COMMAND_MONITOR = new Object();
 
     /**
      * @param baseAz Base azimuth. The antenna starts at the base position and the STOW command returns it to the base position
@@ -83,86 +87,100 @@ public class MockAntennaDevice extends EventEmitterImpl<AntennaEvent> implements
 
     @Override
     public void submitCommand(AntennaCommand command) {
-        if (command.type != AntennaCommand.Type.POWERON) {
-            if (!poweredOn) {
-                send(AntennaEvent.Type.DEVICE_POWEROFF_ERROR);
-                return;
+        synchronized (COMMAND_MONITOR) {
+            if (command.type != AntennaCommand.Type.POWERON) {
+                if (!poweredOn) {
+                    send(AntennaEvent.Type.DEVICE_POWEROFF_ERROR);
+                    return;
+                }
+                sendState();
+                send(AntennaEvent.Type.COMMAND_ISSUED, command.toArray());
             }
-            sendState();
-            send(AntennaEvent.Type.COMMAND_ISSUED, command.toArray());
-        }
 
-        ByteBuffer b = ByteBuffer.wrap(command.data);
+            ByteBuffer b = ByteBuffer.wrap(command.data);
 
-        switch (command.type) {
-            case POWERON:
-                if (ses == null || ses.isShutdown()) {
-                    ses = Executors.newScheduledThreadPool(
-                            2, r -> new Thread(r, "mockAntennaDevice")
-                    );
-                    ((ScheduledThreadPoolExecutor) ses).setRemoveOnCancelPolicy(true);
-                }
-
-                poweredOn = true;
-                long baseSysTime = System.currentTimeMillis();
-                baseNanoTime = System.nanoTime();
-
-                ByteBuffer tb = ByteBuffer.allocate(8);
-                tb.putLong(baseSysTime);
-                baseSysTimeBA = tb.array();
-
-                sendControlInfo();
-                sendStateSF = ses.scheduleAtFixedRate(this::sendState, 0, 1000, TimeUnit.MILLISECONDS);
-
-                break;
-            case POWEROFF:
-                poweredOn = false;
-                sendStateSF.cancel(true);
-                ses.shutdownNow();
-                break;
-            case G0:
-                updatePos();
-
-                if (moveStartTime > 0) {
-                    send(AntennaEvent.Type.MOVE_CANCELED, az, el, destAz, destEl);
-                }
-
-                startAz = az;
-                startEl = el;
-                destAz = b.getInt();
-                destEl = b.getInt();
-
-                int azDist = Math.abs(destAz - startAz);
-                int elDist = Math.abs(destEl - startEl);
-
-                moveTime = Math.max(azDist, elDist) / speed;
-                moveStartTime = System.nanoTime();
-                break;
-            case T0:
-                tracking = b.get() != 0;
-                break;
-            case A0:
-                boolean on = b.get() != 0;
-                if (on) {
-                    if (dataCollectSF == null || dataCollectSF.isCancelled() || dataCollectSF.isDone()) {
-                        dataCollectSF = ses.scheduleAtFixedRate(this::sendData, 0, 5000, TimeUnit.MILLISECONDS);
-                    } else {
-                        dataCollectSF.cancel(true);
+            switch (command.type) {
+                case POWERON:
+                    if (ses == null || ses.isShutdown()) {
+                        ses = Executors.newScheduledThreadPool(
+                                2, r -> new Thread(r, "mockAntennaDevice")
+                        );
+                        ((ScheduledThreadPoolExecutor) ses).setRemoveOnCancelPolicy(true);
                     }
-                }
-                break;
-            default:
-                send(AntennaEvent.Type.UNKNOWN_COMMAND_ERROR, command.type.getCode());
-                break;
+
+                    poweredOn = true;
+                    long baseSysTime = System.currentTimeMillis();
+                    baseNanoTime = System.nanoTime();
+                    moveFinishedTime = baseNanoTime;
+
+                    ByteBuffer tb = ByteBuffer.allocate(8);
+                    tb.putLong(baseSysTime);
+                    baseSysTimeBA = tb.array();
+
+                    sendControlInfo();
+                    sendStateSF = ses.scheduleAtFixedRate(this::sendState, 0, 1000, TimeUnit.MILLISECONDS);
+
+                    break;
+                case POWEROFF:
+                    poweredOn = false;
+                    sendStateSF.cancel(true);
+                    ses.shutdownNow();
+                    break;
+                case G0:
+                    updatePos();
+
+                    if (moveStartTime > 0) {
+                        send(AntennaEvent.Type.MOVE_CANCELED, az, el, destAz, destEl);
+                    }
+
+                    startAz = az;
+                    startEl = el;
+
+                    int adjust = tracking ? (int) (DRIFT_FACTOR * getTimeElapsed(trackingStartTime))
+                            : 0;
+
+                    destAz = b.getInt() + adjust;
+                    destEl = b.getInt();
+
+                    int azDist = Math.abs(destAz - startAz);
+                    int elDist = Math.abs(destEl - startEl);
+
+                    moveTime = Math.max(azDist, elDist) / speed;
+                    moveStartTime = System.nanoTime();
+                    break;
+                case T0:
+                    tracking = b.get() != 0;
+                    trackingStartTime = moveFinishedTime;
+                    lastTrackTime = trackingStartTime;
+                    break;
+                case A0:
+                    boolean on = b.get() != 0;
+                    if (on) {
+                        if (dataCollectSF == null || dataCollectSF.isCancelled() || dataCollectSF.isDone()) {
+                            dataCollectSF = ses.scheduleAtFixedRate(this::sendData, 0, 5000, TimeUnit.MILLISECONDS);
+                        } else {
+                            dataCollectSF.cancel(true);
+                        }
+                    }
+                    break;
+                default:
+                    send(AntennaEvent.Type.UNKNOWN_COMMAND_ERROR, command.type.getCode());
+                    break;
+            }
         }
     }
 
     private void updatePos() {
-        if (moveStartTime == -1 && tracking) {
-            long timeDelta = getTimeElapsed(moveFinishedTime);
+        if (tracking) {
+            int adjust = (int) (DRIFT_FACTOR * getTimeElapsed(lastTrackTime));
+            lastTrackTime = System.nanoTime();
 
-            az = destAz + (int) (timeDelta * DRIFT_FACTOR);
-        } else if (moveStartTime > 0) {
+            startAz += adjust;
+            az += adjust;
+            destAz += adjust;
+        }
+
+        if (moveStartTime > 0) {
             long timeDelta = getTimeElapsed(moveStartTime);
 
             if (timeDelta >= moveTime) {

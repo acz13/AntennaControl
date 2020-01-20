@@ -1,9 +1,6 @@
 package me.alchzh.antenna_control.controller;
 
-import me.alchzh.antenna_control.device.AntennaCommand;
-import me.alchzh.antenna_control.device.AntennaDevice;
-import me.alchzh.antenna_control.device.EventEmitterImpl;
-import me.alchzh.antenna_control.device.AntennaEvent;
+import me.alchzh.antenna_control.device.*;
 import me.alchzh.antenna_control.network.NetworkAntennaDevice;
 
 import java.io.BufferedReader;
@@ -28,6 +25,7 @@ public class AntennaController extends EventEmitterImpl<AntennaEvent> {
      */
     public static final DateTimeFormatter dtf =
             DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss.SSS ");
+    private static final Object POWERON_MONITOR = new Object();
 
     private final AntennaDevice device;
     /**
@@ -39,10 +37,16 @@ public class AntennaController extends EventEmitterImpl<AntennaEvent> {
      */
     private Future<?> sf;
     private AntennaScript.AntennaScriptRunner activeRunner;
+
     /**
      * The baseTime is initially set to unix epoch before the device updates us
      */
     private ZonedDateTime baseTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC"));
+
+
+    public ZonedDateTime getBaseTime() {
+        return baseTime;
+    }
 
     private int az;
     private int el;
@@ -68,12 +72,20 @@ public class AntennaController extends EventEmitterImpl<AntennaEvent> {
         return el;
     }
 
+    public int getDestAz() {
+        return destAz;
+    }
+
+    public int getDestEl() {
+        return destEl;
+    }
+
     public int getBaseAz() {
-        return az;
+        return baseAz;
     }
 
     public int getBaseEl() {
-        return el;
+        return baseEl;
     }
 
     public int getLastEventTime() {
@@ -99,10 +111,10 @@ public class AntennaController extends EventEmitterImpl<AntennaEvent> {
             lastEventTime = event.time;
             lastNanoTime = System.nanoTime();
 
-            sendEvent(event);
-
             String log = makeLogString(event);
             System.out.printf("%s %s\n", getFormattedTime(event.time), log);
+
+            sendEvent(event);
         });
     }
 
@@ -112,7 +124,7 @@ public class AntennaController extends EventEmitterImpl<AntennaEvent> {
      * @param args Command line arguments
      * @throws IOException On any IOException
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
 //        AntennaDevice device = new MockAntennaDevice(0, 0, 0, 0, u(135), u(70), u(5 / 1000.0));
         AntennaDevice device = new NetworkAntennaDevice("127.0.0.1", 52532);
 
@@ -124,6 +136,9 @@ public class AntennaController extends EventEmitterImpl<AntennaEvent> {
         AntennaScript script = new AntennaScript(in);
 
         controller.runScript(script);
+
+        controller.sf.get();
+
         System.exit(0);
     }
 
@@ -178,12 +193,22 @@ public class AntennaController extends EventEmitterImpl<AntennaEvent> {
                 destAz = b.getInt();
                 destEl = b.getInt();
 
-                return String.format("Current location: (%.3f, %.3f)", d(az), d(el));
+                if (az == destAz && el == destEl) {
+                    return String.format("Current location: (%.3f, %.3f)", d(az), d(el));
+                } else {
+                    return String.format("Current location: (%.3f, %.3f). Moving to (%.3f, %.3f)", d(az), d(el), d(destAz), d(destEl));
+                }
             case MOVE_FINISHED:
                 az = b.getInt();
                 el = b.getInt();
 
                 return String.format("Move finished. Current location: (%.3f, %.3f)", d(az), d(el));
+            case MOVE_CANCELED:
+                az = b.getInt();
+                el = b.getInt();
+
+                return String.format("Move canceled. Current location: (%.3f, %.3f)", d(az), d(el));
+
             case MEASUREMENT:
             default:
                 // Prepend "Error: " to any errors so we don't need to redefine this every time
@@ -234,8 +259,23 @@ public class AntennaController extends EventEmitterImpl<AntennaEvent> {
     /**
      * Power on the device
      */
-    public void poweron() {
+    public void poweron() throws InterruptedException {
+        EventEmitter.Listener<AntennaEvent> notifier = (AntennaEvent event) -> {
+            synchronized (POWERON_MONITOR) {
+                if (event.type == AntennaEvent.Type.BASE_TIME) {
+                    POWERON_MONITOR.notify();
+                }
+            }
+        };
+
+        device.addEventListener(notifier);
         device.submitCommand(AntennaCommand.Type.POWERON);
+
+        synchronized (POWERON_MONITOR) {
+            POWERON_MONITOR.wait();
+
+            device.removeEventListener(notifier);
+        }
     }
 
     /**

@@ -1,6 +1,9 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.DefaultCaret;
-import java.io.PrintStream;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -10,11 +13,13 @@ import static me.alchzh.antenna_control.util.Units.d;
 public class MeasurementMonitor {
     private JTextArea measurementTextArea;
     private JPanel mainPanel;
+    private JButton saveDataAsButton;
     private ByteBuffer dataBuffer = ByteBuffer.allocate(1024);
 
     public MeasurementMonitor() {
         DefaultCaret caret = (DefaultCaret) measurementTextArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        saveDataAsButton.addActionListener(e -> { saveAs(); });
     }
 
     public void addMeasurement(int az, int el, byte[] data) {
@@ -46,5 +51,39 @@ public class MeasurementMonitor {
         frame.setVisible(true);
 
         return mm;
+    }
+
+    public void saveAs() {
+        FileNameExtensionFilter extensionFilter = new FileNameExtensionFilter("Data File", "dat");
+        final JFileChooser saveAsFileChooser = new JFileChooser();
+        saveAsFileChooser.setApproveButtonText("Save");
+        saveAsFileChooser.setFileFilter(extensionFilter);
+        int actionDialog = saveAsFileChooser.showOpenDialog(null);
+        if (actionDialog != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        // !! File fileName = new File(SaveAs.getSelectedFile() + ".txt");
+        File file = saveAsFileChooser.getSelectedFile();
+        if (!file.getName().endsWith(".dat")) {
+            file = new File(file.getAbsolutePath() + ".dat");
+        }
+
+        BufferedWriter outFile = null;
+        try {
+            outFile = new BufferedWriter(new FileWriter(file));
+
+            measurementTextArea.write(outFile);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (outFile != null) {
+                try {
+                    outFile.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

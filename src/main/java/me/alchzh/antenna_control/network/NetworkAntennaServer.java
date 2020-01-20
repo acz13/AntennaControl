@@ -8,6 +8,8 @@ import me.alchzh.antenna_control.mock_device.MockAntennaDevice;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.Buffer;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -97,39 +99,49 @@ public class NetworkAntennaServer implements EventEmitter.Listener<AntennaEvent>
      *
      * @param host Host to bind to
      * @param port Port to listen on
-     * @throws IOException On any IOException
      */
-    public void listen(String host, int port) throws IOException {
-        serverSocket.socket().bind(new InetSocketAddress(host, port));
-        System.out.printf("Listening on... %s:%d\n", host, port);
-        client = serverSocket.accept();
-        System.out.printf("Client obtained %s", client.getRemoteAddress());
+    public void listen(String host, int port) {
+        try {
+            serverSocket.socket().bind(new InetSocketAddress(host, port));
+            System.out.printf("Listening on... %s:%d\n", host, port);
+            client = serverSocket.accept();
+            System.out.printf("Client obtained %s\n", client.getRemoteAddress());
 
-
-        while (client.isConnected()) {
-            try {
+            while (client.isConnected()) {
                 AntennaCommand command = readCommand();
                 System.out.println(command);
 
                 device.submitCommand(command);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
             }
+        } catch (IOException e) {
+            System.out.println("Server closed because of error or forced close");
+            e.printStackTrace();
         }
     }
 
     public void close() throws IOException {
+        device.removeEventListener(this);
+        device.submitCommand(AntennaCommand.Type.POWEROFF);
+
         if (client != null) {
             client.close();
         }
+
+        serverSocket.close();
     }
 
     @Override
     public void eventOccurred(AntennaEvent event) {
-        writeBuffer.clear();
-        writeBuffer.put(event.toArray());
-        writeBuffer.put((byte) 0x0A);
+        if (writeBuffer.position() > 0) {
+            writeBuffer.compact();
+        }
+
+        try {
+            writeBuffer.put(event.toArray());
+            writeBuffer.put((byte) 0x0A);
+        } catch (BufferOverflowException e) {
+            e.printStackTrace();
+        }
         writeBuffer.flip();
 
         try {
