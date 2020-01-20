@@ -176,6 +176,7 @@ public class MockAntennaDevice extends EventEmitterImpl<AntennaEvent> implements
             lastTrackTime = System.nanoTime();
 
             startAz += adjust;
+            sensorAz += adjust;
             az += adjust;
             destAz += adjust;
         }
